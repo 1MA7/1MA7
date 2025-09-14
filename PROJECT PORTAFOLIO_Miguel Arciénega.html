@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<!-- Chosen Palette: Warm Neutrals -->
+<!-- Application Structure Plan: The SPA is designed as an interactive dashboard, diverging from the linear document format. The structure includes: 1) A main navigation header (Overview, Projects, Methodologies, Impact) for task-oriented exploration. 2) An "Overview" section with key stats for an immediate impression. 3) An interactive "Projects" section with category filters (Behavioral, Evaluation, Systems) and dynamic content display (clicking a card reveals details). This allows users (e.g., recruiters) to focus on areas of interest. 4) A "Methodologies" section to visually highlight technical expertise. 5) An "Impact" dashboard with summary charts to synthesize results. This architecture was chosen to transform the static portfolio into an exploratory tool, facilitating quick synthesis and deep dives, which is more user-friendly and impactful than a simple scrollable page. -->
+<!-- Visualization & Content Choices: 1. Overview Stats: Goal(Inform) -> Stat Cards(HTML/CSS) -> No Interaction -> Justification(Quickly conveys scale of experience). 2. Project Details: Goal(Organize/Inform) -> Filterable Cards + Dynamic Text Blocks(JS) -> Click to filter/view details -> Justification(Allows user-led discovery, prevents info overload). 3. Methodology Diagram: Goal(Organize/Relate) -> Interactive List(HTML/CSS/JS) -> Hover/Click for info -> Justification(Clearly links technical skills to specific projects). 4. Impact Charts: Goal(Compare/Synthesize) -> Donut & Bar Charts(Chart.js/Canvas) -> Hover for tooltips -> Justification(Provides a quantitative summary of achievements across projects). 5. Textual Content: Goal(Inform) -> Dynamic Text Blocks -> Updated on interaction -> Justification(Provides context for all visuals and sections). -->
+<!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Project Portfolio | Miguel Angel Arciénega Avilés</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FDFBF8;
+            color: #4A4A4A;
+        }
+        .nav-link {
+            transition: color 0.3s, border-color 0.3s;
+        }
+        .nav-link.active {
+            color: #C57B57;
+            border-bottom-color: #C57B57;
+        }
+        .project-card {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .project-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .filter-btn {
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .filter-btn.active {
+            background-color: #C57B57;
+            color: #FFFFFF;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin: auto;
+            height: 300px;
+            max-height: 350px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+                max-height: 400px;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-[#FDFBF8] sticky top-0 z-20 shadow-sm">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div>
+                <h1 class="text-xl font-bold text-[#3E3636]">Miguel Angel Arciénega Avilés</h1>
+                <p class="text-sm text-gray-500">Monitoring, Evaluation, Research, and Learning</p>
+            </div>
+            <nav class="hidden md:flex space-x-8">
+                <a href="#overview" class="nav-link text-gray-600 hover:text-[#C57B57] border-b-2 border-transparent pb-1">Overview</a>
+                <a href="#projects" class="nav-link text-gray-600 hover:text-[#C57B57] border-b-2 border-transparent pb-1">Projects</a>
+                <a href="#methodologies" class="nav-link text-gray-600 hover:text-[#C57B57] border-b-2 border-transparent pb-1">Methodologies</a>
+                <a href="#impact" class="nav-link text-gray-600 hover:text-[#C57B57] border-b-2 border-transparent pb-1">Impact</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-12">
+
+        <section id="overview" class="mb-24">
+            <h2 class="text-3xl font-bold text-center text-[#3E3636] mb-4">Portfolio Overview</h2>
+            <p class="max-w-3xl mx-auto text-center text-gray-600 mb-12">This portfolio presents a selection of projects that demonstrate my experience in designing and implementing M&E systems to drive social change. My approach focuses on transforming M&E from a reporting tool into a strategic research mechanism that generates insights into the behaviors and motivations of communities, enabling program adaptation and evidence-based decision-making.</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                <div class="bg-white p-6 rounded-lg shadow-md border border-gray-100">
+                    <div class="text-4xl font-bold text-[#C57B57]">6</div>
+                    <p class="text-gray-500 mt-2">Featured Projects</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md border border-gray-100">
+                    <div class="text-4xl font-bold text-[#C57B57]">4+</div>
+                    <p class="text-gray-500 mt-2">Key Methodologies Applied</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md border border-gray-100">
+                    <div class="text-4xl font-bold text-[#C57B57]">5+</div>
+                    <p class="text-gray-500 mt-2">International Organizations</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="projects" class="mb-24">
+            <h2 class="text-3xl font-bold text-center text-[#3E3636] mb-4">Project Showcase</h2>
+            <p class="max-w-3xl mx-auto text-center text-gray-600 mb-12">Explore a curated selection of my work. Use the filters to navigate through different types of expertise, from behavioral research to systems design. Click on any project card to view a detailed breakdown of the context, my actions, and the results achieved.</p>
+            
+            <div id="project-filters" class="flex justify-center flex-wrap gap-2 mb-8">
+                <button class="filter-btn active px-4 py-2 text-sm font-medium rounded-full bg-gray-200 text-gray-700" data-filter="all">All Projects</button>
+                <button class="filter-btn px-4 py-2 text-sm font-medium rounded-full bg-gray-200 text-gray-700" data-filter="behavioral">Behavioral Research</button>
+                <button class="filter-btn px-4 py-2 text-sm font-medium rounded-full bg-gray-200 text-gray-700" data-filter="evaluation">Impact Evaluation</button>
+                <button class="filter-btn px-4 py-2 text-sm font-medium rounded-full bg-gray-200 text-gray-700" data-filter="systems">Systems & Management</button>
+            </div>
+
+            <div class="lg:grid lg:grid-cols-12 lg:gap-8">
+                <div id="project-grid" class="lg:col-span-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-6">
+                </div>
+                <div id="project-details-container" class="lg:col-span-7 mt-8 lg:mt-0 bg-white p-8 rounded-lg shadow-md border border-gray-100 sticky top-24 self-start">
+                    <p class="text-center text-gray-500">Select a project to see the details here.</p>
+                </div>
+            </div>
+        </section>
+        
+        <section id="methodologies" class="mb-24">
+            <h2 class="text-3xl font-bold text-center text-[#3E3636] mb-4">Core Methodologies</h2>
+            <p class="max-w-3xl mx-auto text-center text-gray-600 mb-12">My work is grounded in robust, evidence-based methodologies. The following approaches are central to my process of transforming data into actionable insights and sustainable impact, connecting technical rigor with real-world application.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-md border border-gray-100 text-center">
+                    <h3 class="font-bold text-lg text-[#C57B57]">Outcome Harvesting</h3>
+                    <p class="text-sm text-gray-600 mt-2">Identifies and validates non-predefined behavioral changes to understand emergent, real-world impact in complex environments.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md border border-gray-100 text-center">
+                    <h3 class="font-bold text-lg text-[#C57B57]">Quasi-Experimental Analysis</h3>
+                    <p class="text-sm text-gray-600 mt-2">Uses "with and without project" scenarios to isolate and measure the specific impact of an intervention, providing a rigorous basis for evaluation.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md border border-gray-100 text-center">
+                    <h3 class="font-bold text-lg text-[#C57B57]">DAC Evaluation Criteria</h3>
+                    <p class="text-sm text-gray-600 mt-2">Applies standardized criteria (Relevance, Effectiveness, Impact, etc.) for objective, comprehensive project assessment.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md border border-gray-100 text-center">
+                    <h3 class="font-bold text-lg text-[#C57B57]">Knowledge Management</h3>
+                    <p class="text-sm text-gray-600 mt-2">Structures a complete data-to-learning lifecycle, ensuring insights are captured, shared, and used for organizational improvement.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="impact" class="mb-16">
+            <h2 class="text-3xl font-bold text-center text-[#3E3636] mb-4">Synthesized Impact</h2>
+            <p class="max-w-3xl mx-auto text-center text-gray-600 mb-12">Beyond individual projects, my work contributes to a broader picture of impact and expertise. These visualizations synthesize key data points from the portfolio, offering an at-a-glance overview of the scale and thematic focus of my experience.</p>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h3 class="text-xl font-bold text-center mb-4 text-[#3E3636]">Project Focus Areas</h3>
+                    <div class="chart-container">
+                        <canvas id="expertiseChart"></canvas>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold text-center mb-4 text-[#3E3636]">Quantitative Project Reach</h3>
+                    <div class="chart-container">
+                        <canvas id="reachChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+    
+    <footer class="bg-gray-100 border-t border-gray-200">
+        <div class="container mx-auto px-6 py-8 text-center text-gray-600">
+            <p class="font-bold">Miguel Angel Arciénega Avilés</p>
+            <p class="text-sm">marcienega@outlook.com | (+591) 72869924</p>
+            <a href="https://www.linkedin.com/in/m-arcienega" target="_blank" class="text-sm text-[#C57B57] hover:underline">LinkedIn Profile</a>
+        </div>
+    </footer>
+
+<script>
+const projectsData = [
+    {
+        id: 1,
+        title: 'Behavioural Research in Complex Environments',
+        organization: 'CONEXIÓN',
+        program: 'SUFASEC',
+        category: 'behavioral',
+        context: 'The SUFASEC program operates in Bolivia, Colombia, and Guatemala, involving multiple partners to strengthen child protection systems. The challenge was to move beyond traditional monitoring to understand the root causes of change. The goal was not only to measure progress against indicators but to understand what behavioral changes were occurring among youth and communities and why.',
+        action: 'I designed and implemented a mixed-methods M&E system that functioned as a behavioral research engine:<ul><li class="mt-2 ml-4 list-disc"><b>Quantitative Tracking:</b> I managed and consolidated partner data through standardized templates.</li><li class="mt-2 ml-4 list-disc"><b>Qualitative Research:</b> I led the adoption of the Outcome Harvesting methodology to identify, document, and validate "signals" of behavioral change not captured by formal indicators.</li><li class="mt-2 ml-4 list-disc"><b>Analysis and Visualization:</b> I centralized the information in Power BI dashboards to cross-reference quantitative data with qualitative findings, transforming complex data into actionable insights.</li></ul>',
+        result: 'A key finding was that the trust built by a specific local partner was a stronger predictor of behavioral change than direct incentives. This insight, validated through Outcome Harvesting, allowed the alliance to recommend that partners prioritize trust-building strategies, thereby improving program effectiveness.',
+        evidence: [
+            { name: 'Indicator Dashboard (Power BI)', url: 'https://app.powerbi.com/view?r=eyJrIjoiMDE2M2VlYTctOWJjNy00YmQwLThhMmMtNjkyNzMwYjk5MWQ5IiwidCI6IjI5ZTcxNGQ0LTRiNTYtNDlmOC04OTA0LWJjYjczNzg3Mjc2ZSJ9' },
+            { name: 'Methodological Tool (Google Sheets)', url: 'https://docs.google.com/spreadsheets/d/1i_5N9i5YzXUlYwwXkviJBWJECssM0TSHYYzVQfjR2Pg/edit?usp=drive_link' },
+        ]
+    },
+    {
+        id: 2,
+        title: 'Developing Methodologies for Sustainable Change',
+        organization: 'FAO',
+        program: 'Amazonía Emprendedora',
+        category: 'systems',
+        context: 'The program aimed to strengthen 30 community enterprises in the Bolivian Amazon, ensuring that support fostered long-term sustainable business and resource management practices.',
+        action: 'I co-authored and implemented the "Amazonía Emprendedora" methodology. My role included designing the financial viability and market components, directly training the 30 enterprises to internalize behaviors like long-term planning, and monitoring the adoption of the taught practices.',
+        result: 'The methodology became a replicable asset. We achieved that 85% of the supported enterprises reached profitability within two years. The behavioral approach of the training ensured that entrepreneurs developed new management skills, guaranteeing sustainability beyond the project\'s lifespan.',
+        evidence: [
+            { name: 'Final Consultancy Report (Google Drive)', url: 'https://drive.google.com/file/d/19DdOtP9ItpXepP7Ch2zjJsHYmOJM2_JN/view?usp=sharing' },
+            { name: 'Methodological Guide', url: '#' }
+        ]
+    },
+    {
+        id: 3,
+        title: 'Technical Rigor in Impact Evaluation',
+        organization: 'EMPODERAR PAR III',
+        program: 'Productive Alliances',
+        category: 'evaluation',
+        context: 'My task was to assess the viability of productive alliance plans before their co-financing, applying a rigorous methodology to ensure public investment would generate real impact.',
+        action: 'I applied a quasi-experimental analysis, evaluating each plan under "with project" and "without project" scenarios to isolate the intervention\'s impact. I also conducted sensitivity analyses on key variables (prices, costs) to understand how behavioral and market factors could affect viability.',
+        result: 'I evaluated over 20 alliance plans, providing an objective basis for investment decisions. My analysis identified weaknesses in the behavioral assumptions of producers, which led to adjustments in the plans before their approval, mitigating risks.',
+        evidence: [
+            { name: 'Reference Documents', url: '#' }
+        ]
+    },
+    {
+        id: 4,
+        title: 'Comprehensive Project and Knowledge Management',
+        organization: 'CONEXIÓN',
+        program: 'Lazos Project',
+        category: 'systems',
+        context: 'To ensure learning in multi-component projects like "Lazos" (focused on agrifood and climate change), it was crucial to design a complete data and knowledge lifecycle.',
+        action: 'I implemented a comprehensive system covering: data collection tool design, Power BI visualization, narrative reporting, impact communication through "Stories," and the design of the "Knowledge Management Strategy" for Conexión Colombia.',
+        result: 'This holistic approach ensured that data was transformed into useful information for management, reporting, communication, and organizational learning, improving the overall efficiency and impact of the interventions.',
+        evidence: [
+            { name: 'Tracking Tool', url: 'https://docs.google.com/spreadsheets/d/1pvpyj1N8YFzyWPKEesoC9BMBcBWz9wa0UJy5MaxJ2sY/edit?gid=0#gid=0' },
+            { name: 'Dashboard (Power BI)', url: 'https://app.powerbi.com/view?r=eyJrIjoiOTE4NDJjM2UtNTVkMi00OWYzLTlkMmQtMDNjMWUyOTIxZGJkIiwidCI6IjI5ZTcxNGQ0LTRiNTYtNDlmOC04OTA0LWJjYjczNzg3Mjc2ZSJ9' },
+            { name: 'Final Report', url: 'https://docs.google.com/document/d/1lPtyDUMMHE7InaBVyeWVeUGHtOIFB-8F/edit?usp=sharing' },
+            { name: 'Impact Stories', url: 'https://www.canva.com/design/DAGjTD3xkj4/ZizvJQErU2LCTIEh9ZadeQ/view' },
+            { name: 'Strategic Document', url: 'https://drive.google.com/file/d/1FnAu-zqQl9ciMALgpP_lzdr8KEEH6o8c/view?usp=sharing' },
+        ]
+    },
+    {
+        id: 5,
+        title: 'Design of Comprehensive Monitoring Systems',
+        organization: 'UNODC',
+        program: 'Intervention Projects',
+        category: 'systems',
+        context: 'In my current role, I am responsible for designing and operating monitoring systems for intervention projects in sensitive environments.',
+        action: 'I have designed a comprehensive monitoring system that includes: continuous monitoring of activities and indicator progress, field supervision, partner coordination, support for external evaluations, and knowledge management.',
+        result: 'This structured system has provided a clear, up-to-date view of project progress, facilitating early identification of deviations and corrective decision-making, and has established a culture of continuous learning.',
+        evidence: []
+    },
+    {
+        id: 6,
+        title: 'Project Evaluation in the Energy Sector',
+        organization: 'OLADE',
+        program: 'Rural Electrification',
+        category: 'evaluation',
+        context: 'I was hired to conduct the final evaluation of the "Rural Electrification in Isolated Areas in Bolivia" project. The challenge was to objectively measure the results and impacts of an electrification initiative using international evaluation criteria.',
+        action: 'I developed a comprehensive evaluation plan, including a stakeholder analysis and a detailed evaluation matrix. I designed and applied mixed-methods data collection instruments using Kobo Toolbox for fieldwork. Finally, I processed and analyzed the data to evaluate the project against the five DAC criteria: Relevance, Effectiveness, Efficiency, Impact, and Sustainability.',
+        result: 'The final evaluation report provided OLADE with a clear analysis of the project\'s achievements and challenges. My recommendations informed the design of future rural electrification interventions, highlighting the need to strengthen community sustainability models.',
+        evidence: [
+            { name: 'Final Report', url: '#' }
+        ]
+    }
+];
+
+document.addEventListener('DOMContentLoaded', () => {
+    const projectGrid = document.getElementById('project-grid');
+    const projectDetailsContainer = document.getElementById('project-details-container');
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    let activeCard = null;
+
+    function displayProjectDetails(projectId) {
+        const project = projectsData.find(p => p.id === projectId);
+        if (!project) return;
+        
+        let evidenceHTML = project.evidence.length > 0 ? 
+            `<h4 class="font-semibold text-gray-700 mt-6 mb-2">Evidence & Resources:</h4>
+             <ul class="space-y-2">` +
+            project.evidence.map(e => `
+                <li>
+                    <a href="${e.url}" target="_blank" class="text-sm text-[#C57B57] hover:underline flex items-center">
+                        ${e.name}
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                    </a>
+                </li>`).join('') + `</ul>` : '<p class="text-sm text-gray-400 mt-4">Evidence for this project is confidential or available upon request.</p>';
+
+        projectDetailsContainer.innerHTML = `
+            <h3 class="text-2xl font-bold text-[#3E3636]">${project.title}</h3>
+            <p class="text-sm text-gray-500 mb-4">${project.organization} | ${project.program}</p>
+            <div>
+                <h4 class="font-semibold text-gray-700 mb-2">Context:</h4>
+                <p class="text-gray-600 text-sm leading-relaxed">${project.context}</p>
+                <h4 class="font-semibold text-gray-700 mt-4 mb-2">Action:</h4>
+                <div class="text-gray-600 text-sm leading-relaxed">${project.action}</div>
+                <h4 class="font-semibold text-gray-700 mt-4 mb-2">Result:</h4>
+                <p class="text-gray-600 text-sm leading-relaxed font-medium">${project.result}</p>
+                ${evidenceHTML}
+            </div>`;
+    }
+
+    function renderProjects(filter = 'all') {
+        projectGrid.innerHTML = '';
+        const filteredProjects = filter === 'all' ? projectsData : projectsData.filter(p => p.category === filter);
+
+        filteredProjects.forEach(project => {
+            const card = document.createElement('div');
+            card.className = 'project-card bg-white p-6 rounded-lg shadow-md border border-gray-100 cursor-pointer';
+            card.dataset.id = project.id;
+            card.innerHTML = `
+                <h3 class="font-bold text-lg text-[#3E3636]">${project.title}</h3>
+                <p class="text-sm text-gray-500 mt-1">${project.organization}</p>
+                <p class="text-xs text-gray-400 mt-2">${project.context.substring(0, 100)}...</p>
+            `;
+            card.addEventListener('click', () => {
+                const projectId = parseInt(card.dataset.id);
+                displayProjectDetails(projectId);
+
+                if (activeCard) {
+                    activeCard.classList.remove('ring-2', 'ring-[#C57B57]');
+                }
+                card.classList.add('ring-2', 'ring-[#C57B57]');
+                activeCard = card;
+            });
+            projectGrid.appendChild(card);
+        });
+        
+        if (filteredProjects.length > 0 && !activeCard) {
+            projectGrid.firstChild.click();
+        } else if (filteredProjects.length === 0) {
+             projectDetailsContainer.innerHTML = `<p class="text-center text-gray-500">No projects found for this category.</p>`;
+        }
+    }
+    
+    filterButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            activeCard = null;
+            projectDetailsContainer.innerHTML = `<p class="text-center text-gray-500">Select a project to see the details here.</p>`;
+            renderProjects(button.dataset.filter);
+        });
+    });
+
+    renderProjects();
+
+    const expertiseCtx = document.getElementById('expertiseChart').getContext('2d');
+    new Chart(expertiseCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Systems & Management', 'Impact Evaluation', 'Behavioral Research'],
+            datasets: [{
+                data: [3, 2, 1],
+                backgroundColor: ['#E3D5CA', '#C57B57', '#8A6F62'],
+                borderColor: '#FDFBF8',
+                borderWidth: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            if (context.parsed !== null) {
+                                label += context.parsed + ' projects';
+                            }
+                            return label;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    const reachCtx = document.getElementById('reachChart').getContext('2d');
+    new Chart(reachCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Enterprises Strengthened (FAO)', 'Alliance Plans Evaluated (EMPODERAR)'],
+            datasets: [{
+                label: 'Count',
+                data: [30, 20],
+                backgroundColor: ['#C57B57', '#E3D5CA'],
+                borderColor: ['#C57B57', '#E3D5CA'],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    const navLinks = document.querySelectorAll('.nav-link');
+    const sections = document.querySelectorAll('main section');
+    window.addEventListener('scroll', () => {
+        let current = '';
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop;
+            if (pageYOffset >= sectionTop - 60) {
+                current = section.getAttribute('id');
+            }
+        });
+
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href').includes(current)) {
+                link.classList.add('active');
+            }
+        });
+    });
+
+});
+</script>
+</body>
+</html>

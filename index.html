@@ -1,425 +1,654 @@
 <!DOCTYPE html>
-<!-- Chosen Palette: Warm Neutrals -->
-<!-- Application Structure Plan: The SPA is designed as an interactive dashboard, diverging from the linear document format. The structure includes: 1) A main navigation header (Overview, Projects, Methodologies, Impact) for task-oriented exploration. 2) An "Overview" section with key stats for an immediate impression. 3) An interactive "Projects" section with category filters (Behavioral, Evaluation, Systems) and dynamic content display (clicking a card reveals details). This allows users (e.g., recruiters) to focus on areas of interest. 4) A "Methodologies" section to visually highlight technical expertise. 5) An "Impact" dashboard with summary charts to synthesize results. This architecture was chosen to transform the static portfolio into an exploratory tool, facilitating quick synthesis and deep dives, which is more user-friendly and impactful than a simple scrollable page. -->
-<!-- Visualization & Content Choices: 1. Overview Stats: Goal(Inform) -> Stat Cards(HTML/CSS) -> No Interaction -> Justification(Quickly conveys scale of experience). 2. Project Details: Goal(Organize/Inform) -> Filterable Cards + Dynamic Text Blocks(JS) -> Click to filter/view details -> Justification(Allows user-led discovery, prevents info overload). 3. Methodology Diagram: Goal(Organize/Relate) -> Interactive List(HTML/CSS/JS) -> Hover/Click for info -> Justification(Clearly links technical skills to specific projects). 4. Impact Charts: Goal(Compare/Synthesize) -> Donut & Bar Charts(Chart.js/Canvas) -> Hover for tooltips -> Justification(Provides a quantitative summary of achievements across projects). 5. Textual Content: Goal(Inform) -> Dynamic Text Blocks -> Updated on interaction -> Justification(Provides context for all visuals and sections). -->
-<!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Project Portfolio | Miguel Angel Arciénega Avilés</title>
+    <title>Strategic Impact Portfolio - Miguel Angel Arciénega</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #FDFBF8;
-            color: #4A4A4A;
+        /* Paleta de Colores del Diseño Original */
+        :root {
+            --bg-main: #F1F1F1;
+            --text-dark: #3F3F3F;
+            --text-medium: #6B7280;
+            --accent-warm: #C57B57;
+            --bg-card: #FFFFFF;
+            --border-light: #E5E7EB;
         }
-        .nav-link {
-            transition: color 0.3s, border-color 0.3s;
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg-main);
+            color: var(--text-dark);
         }
-        .nav-link.active {
-            color: #C57B57;
-            border-bottom-color: #C57B57;
-        }
-        .project-card {
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-        .project-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        }
-        .filter-btn {
-            transition: background-color 0.3s, color 0.3s;
-        }
-        .filter-btn.active {
-            background-color: #C57B57;
-            color: #FFFFFF;
-        }
-        .chart-container {
-            position: relative;
-            width: 100%;
-            max-width: 500px;
-            margin: auto;
-            height: 300px;
-            max-height: 350px;
-        }
-        @media (min-width: 768px) {
-            .chart-container {
-                height: 350px;
-                max-height: 400px;
-            }
+        .project-card { transition: all 0.3s ease; background-color: var(--bg-card); }
+        .project-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+        .filter-btn { background-color: var(--bg-card); color: var(--text-dark); }
+        .filter-btn.active { background-color: var(--accent-warm); color: white; }
+        .modal-content { animation: fadeIn 0.3s ease; background-color: var(--bg-card); }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        
+        /* Iframe Responsivo y Escalado */
+        .iframe-container { position: relative; width: 100%; overflow: hidden; padding-top: 60.25%; /* Aspect ratio ~16:9 */ }
+        .iframe-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+        .iframe-scaled-container { height: 380px; overflow: hidden; border: 1px solid var(--border-light); border-radius: 0.5rem; } /* Contenedor para el iframe escalado */
+        .iframe-scaled-container iframe { 
+            width: 250%; 
+            height: 250%;
+            transform: scale(0.4); 
+            transform-origin: top left; 
         }
     </style>
 </head>
-<body class="antialiased">
+<body class="p-4 sm:p-8">
 
-    <header class="bg-[#FDFBF8] sticky top-0 z-20 shadow-sm">
-        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <div>
-                <h1 class="text-xl font-bold text-[#3E3636]">Miguel Angel Arciénega Avilés</h1>
-                <p class="text-sm text-gray-500">Monitoring, Evaluation, Research, and Learning</p>
-            </div>
-            <nav class="hidden md:flex space-x-8">
-                <a href="#overview" class="nav-link text-gray-600 hover:text-[#C57B57] border-b-2 border-transparent pb-1">Overview</a>
-                <a href="#projects" class="nav-link text-gray-600 hover:text-[#C57B57] border-b-2 border-transparent pb-1">Projects</a>
-                <a href="#methodologies" class="nav-link text-gray-600 hover:text-[#C57B57] border-b-2 border-transparent pb-1">Methodologies</a>
-                <a href="#impact" class="nav-link text-gray-600 hover:text-[#C57B57] border-b-2 border-transparent pb-1">Impact</a>
-            </nav>
-        </div>
-    </header>
+    <!-- Contenedor principal --><div class="container mx-auto max-w-7xl">
 
-    <main class="container mx-auto px-6 py-12">
-
-        <section id="overview" class="mb-24">
-            <h2 class="text-3xl font-bold text-center text-[#3E3636] mb-4">Portfolio Overview</h2>
-            <p class="max-w-3xl mx-auto text-center text-gray-600 mb-12">This portfolio presents a selection of projects that demonstrate my experience in designing and implementing M&E systems to drive social change. My approach focuses on transforming M&E from a reporting tool into a strategic research mechanism that generates insights into the behaviors and motivations of communities, enabling program adaptation and evidence-based decision-making.</p>
+        <!-- SECCIÓN 1: Encabezado y Propuesta de Valor --><header class="text-center py-12">
+            <h1 class="text-4xl md:text-5xl font-bold tracking-tight" style="color: var(--text-dark);">Miguel Angel Arciénega Avilés</h1>
+            <p class="text-xl mt-2" style="color: var(--accent-warm);">M&E Specialist & Data Systems Architect</p>
             
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-                <div class="bg-white p-6 rounded-lg shadow-md border border-gray-100">
-                    <div class="text-4xl font-bold text-[#C57B57]">6</div>
-                    <p class="text-gray-500 mt-2">Featured Projects</p>
+            <div class="max-w-4xl mx-auto mt-6 text-left p-6 rounded-xl shadow-sm" style="background-color: var(--bg-card); color: var(--text-medium);">
+                <p class="font-bold text-lg mb-2" style="color: var(--text-dark);">My Value Proposition:</p>
+                <p>I am a Program/Project Management and Monitoring, Evaluation, and Learning (M&E) professional with over 10 years of experience driving the impact of sustainable development programs in Latin America. With 4 years in regional roles for international organizations and currently pursuing my PMP® certification, my approach is focused on designing and implementing strategies that are both programmatically sound and technically advanced...</p>
+            </div>
+
+            <div class="mt-10 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+                <div class="p-6 rounded-lg shadow-md text-center" style="background-color: var(--bg-card);">
+                    <p class="text-3xl font-bold" style="color: var(--accent-warm);">10+</p>
+                    <p class="mt-1" style="color: var(--text-medium);">Years of Experience</p>
                 </div>
-                <div class="bg-white p-6 rounded-lg shadow-md border border-gray-100">
-                    <div class="text-4xl font-bold text-[#C57B57]">4+</div>
-                    <p class="text-gray-500 mt-2">Key Methodologies Applied</p>
+                <div class="p-6 rounded-lg shadow-md text-center" style="background-color: var(--bg-card);">
+                    <p class="text-3xl font-bold" style="color: var(--accent-warm);">$25M+</p>
+                    <p class="mt-1" style="color: var(--text-medium);">in Managed M&E Portfolios</p>
                 </div>
-                <div class="bg-white p-6 rounded-lg shadow-md border border-gray-100">
-                    <div class="text-4xl font-bold text-[#C57B57]">5+</div>
-                    <p class="text-gray-500 mt-2">International Organizations</p>
+                <div class="p-6 rounded-lg shadow-md text-center" style="background-color: var(--bg-card);">
+                    <p class="text-3xl font-bold" style="color: var(--accent-warm);">4</p>
+                    <p class="mt-1" style="color: var(--text-medium);">Years in Regional Roles (LATAM)</p>
                 </div>
             </div>
-        </section>
+        </header>
 
-        <section id="projects" class="mb-24">
-            <h2 class="text-3xl font-bold text-center text-[#3E3636] mb-4">Project Showcase</h2>
-            <p class="max-w-3xl mx-auto text-center text-gray-600 mb-12">Explore a curated selection of my work. Use the filters to navigate through different types of expertise, from behavioral research to systems design. Click on any project card to view a detailed breakdown of the context, my actions, and the results achieved.</p>
+        <!-- SECCIÓN 2: Proyectos Estratégicos --><main id="projects" class="py-12">
+             <h2 class="text-3xl font-bold text-center mb-10" style="color: var(--text-dark);">Strategic Projects</h2>
+
+            <!-- Filtros Interactivos --><div class="flex flex-wrap justify-center gap-2 mb-12">
+                <button class="filter-btn active px-4 py-2 text-sm font-medium rounded-full shadow-sm hover:opacity-80" data-filter="all">All</button>
+                <button class="filter-btn px-4 py-2 text-sm font-medium rounded-full shadow-sm hover:opacity-80" data-filter="ecosystems">Entrepreneurial Ecosystems</button>
+                <button class="filter-btn px-4 py-2 text-sm font-medium rounded-full shadow-sm hover:opacity-80" data-filter="inclusion">Financial Inclusion</button>
+                <button class="filter-btn px-4 py-2 text-sm font-medium rounded-full shadow-sm hover:opacity-80" data-filter="climate">Climate Change Adaptation</button>
+                <button class="filter-btn px-4 py-2 text-sm font-medium rounded-full shadow-sm hover:opacity-80" data-filter="data">Program & Data Management</button>
+            </div>
             
-            <div id="project-filters" class="flex justify-center flex-wrap gap-2 mb-8">
-                <button class="filter-btn active px-4 py-2 text-sm font-medium rounded-full bg-gray-200 text-gray-700" data-filter="all">All Projects</button>
-                <button class="filter-btn px-4 py-2 text-sm font-medium rounded-full bg-gray-200 text-gray-700" data-filter="behavioral">Behavioral Research</button>
-                <button class="filter-btn px-4 py-2 text-sm font-medium rounded-full bg-gray-200 text-gray-700" data-filter="evaluation">Impact Evaluation</button>
-                <button class="filter-btn px-4 py-2 text-sm font-medium rounded-full bg-gray-200 text-gray-700" data-filter="systems">Systems & Management</button>
-            </div>
-
-            <div class="lg:grid lg:grid-cols-12 lg:gap-8">
-                <div id="project-grid" class="lg:col-span-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-6">
-                </div>
-                <div id="project-details-container" class="lg:col-span-7 mt-8 lg:mt-0 bg-white p-8 rounded-lg shadow-md border border-gray-100 sticky top-24 self-start">
-                    <p class="text-center text-gray-500">Select a project to see the details here.</p>
-                </div>
-            </div>
-        </section>
+            <div id="project-gallery" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Las tarjetas de proyecto se generan dinámicamente con JS --></div>
+        </main>
         
-        <section id="methodologies" class="mb-24">
-            <h2 class="text-3xl font-bold text-center text-[#3E3636] mb-4">Core Methodologies</h2>
-            <p class="max-w-3xl mx-auto text-center text-gray-600 mb-12">My work is grounded in robust, evidence-based methodologies. The following approaches are central to my process of transforming data into actionable insights and sustainable impact, connecting technical rigor with real-world application.</p>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                <div class="bg-white p-6 rounded-lg shadow-md border border-gray-100 text-center">
-                    <h3 class="font-bold text-lg text-[#C57B57]">Outcome Harvesting</h3>
-                    <p class="text-sm text-gray-600 mt-2">Identifies and validates non-predefined behavioral changes to understand emergent, real-world impact in complex environments.</p>
-                </div>
-                <div class="bg-white p-6 rounded-lg shadow-md border border-gray-100 text-center">
-                    <h3 class="font-bold text-lg text-[#C57B57]">Quasi-Experimental Analysis</h3>
-                    <p class="text-sm text-gray-600 mt-2">Uses "with and without project" scenarios to isolate and measure the specific impact of an intervention, providing a rigorous basis for evaluation.</p>
-                </div>
-                <div class="bg-white p-6 rounded-lg shadow-md border border-gray-100 text-center">
-                    <h3 class="font-bold text-lg text-[#C57B57]">DAC Evaluation Criteria</h3>
-                    <p class="text-sm text-gray-600 mt-2">Applies standardized criteria (Relevance, Effectiveness, Impact, etc.) for objective, comprehensive project assessment.</p>
-                </div>
-                <div class="bg-white p-6 rounded-lg shadow-md border border-gray-100 text-center">
-                    <h3 class="font-bold text-lg text-[#C57B57]">Knowledge Management</h3>
-                    <p class="text-sm text-gray-600 mt-2">Structures a complete data-to-learning lifecycle, ensuring insights are captured, shared, and used for organizational improvement.</p>
-                </div>
+        <!-- SECCIÓN 3: Caja de Herramientas --><footer id="tools" class="py-12 border-t" style="border-color: var(--border-light);">
+             <h2 class="text-2xl font-bold text-center mb-8" style="color: var(--text-dark);">Technical Toolbox</h2>
+            <div class="flex flex-wrap justify-center items-center gap-8" style="color: var(--text-medium);">
+                <span>Python</span> <span>R</span> <span>Power BI</span> <span>MS SQL Server</span> <span>Excel (Advanced)</span> <span>Kobo Toolbox</span>
             </div>
-        </section>
+             <div class="text-center mt-12">
+                 <p style="color: var(--text-medium);">m_arcienega@outlook.com | <a href="https://www.linkedin.com/in/m-arcienega" target="_blank" class="hover:underline" style="color: var(--accent-warm);">LinkedIn Profile</a></p>
+            </div>
+        </footer>
+    </div>
 
-        <section id="impact" class="mb-16">
-            <h2 class="text-3xl font-bold text-center text-[#3E3636] mb-4">Synthesized Impact</h2>
-            <p class="max-w-3xl mx-auto text-center text-gray-600 mb-12">Beyond individual projects, my work contributes to a broader picture of impact and expertise. These visualizations synthesize key data points from the portfolio, offering an at-a-glance overview of the scale and thematic focus of my experience.</p>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                <div>
-                    <h3 class="text-xl font-bold text-center mb-4 text-[#3E3636]">Project Focus Areas</h3>
-                    <div class="chart-container">
-                        <canvas id="expertiseChart"></canvas>
+    <!-- Contenedor de Modales --><div id="modal-container"></div>
+
+    <script>
+    let currentCharts = []; // Variable global para almacenar instancias de gráficos
+
+    const projectsData = {
+        "conexion": {
+            category: "data ecosystems inclusion climate",
+            organization: "ICCO / CONEXIÓN",
+            title: "Architecting a Regional MEL System from Scratch",
+            content: `
+                <div class="space-y-6 text-gray-700">
+                    <div>
+                        <h3 class="font-semibold text-lg mb-2" style="color: var(--accent-warm);">🎯 The Programmatic Challenge</h3>
+                        <p>Following the organizational transition from ICCO, CONEXIÓN operated across 3 Latin American countries without a unified system to measure impact, manage knowledge, or drive data-informed decisions at a regional level. This created inefficiencies, hindered organizational learning, and limited the leadership's ability to gain a consolidated view of the 15+ project portfolio.</p>
                     </div>
-                </div>
-                <div>
-                    <h3 class="text-xl font-bold text-center mb-4 text-[#3E3636]">Quantitative Project Reach</h3>
-                    <div class="chart-container">
-                        <canvas id="reachChart"></canvas>
+                    <div>
+                        <h3 class="font-semibold text-lg mb-2" style="color: var(--accent-warm);">💡 My Strategic Solution & Key Deliverables</h3>
+                        <p class="mb-4">My role was to architect and build the entire MEL system from scratch, acting as the bridge between programmatic strategy and technical implementation. My actions were centered on key pillars:</p>
+                        
+                        <div class="border-l-4 pl-4 space-y-6" style="border-color: var(--accent-warm);">
+                            <div>
+                                <h4 class="font-semibold">1. Designing the Regional Monitoring System</h4>
+                                <p class="text-sm text-gray-600">First, I led the programmatic design based on RBM principles, defining the regional results framework, core indicators, and data flow. This conceptual blueprint ensured the system would answer key strategic questions. Then, I translated this into a technical architecture, implementing the database on MS SQL Server and developing the web-based software for data entry, standardizing reporting across all 3 countries.</p>
+                                <div class="mt-4">
+                                    <h5 class="font-semibold text-md mb-2">Live Demo: Regional Indicators Dashboard</h5>
+                                    <div class="iframe-container bg-gray-200 rounded-md">
+                                        <iframe title="REPORTE INDICADORES REGIONAL CONEXIÓN" src="https://app.powerbi.com/view?r=eyJrIjoiOTU3MGQxYzgtMzk1Zi00NzUwLWJhNTItMmQwOWQ0MWMxMGU0IiwidCI6IjI5ZTcxNGQ0LTRiNTYtNDlmOC04OTA0LWJjYjczNzg3Mjc2ZSJ9" frameborder="0" allowFullScreen="true"></iframe>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h4 class="font-semibold">2. M&E Leadership on Key Projects</h4>
+                                <p class="text-sm text-gray-600">I provided direct M&E leadership for two flagship regional projects: <br>• <b>Lazos (ASDI):</b> Focused on resilient livelihoods for youth and women across 15 municipalities in Bolivia. My role involved designing data collection tools, systematizing information with advanced Excel, and building BI reports to track progress against the Theory of Change. <br>• <b>SUFASEC (DZT):</b> A multi-country project focused on child protection. I adapted the M&E strategy, developed reporting tools, and ensured compliance with IATI transparency standards.</p>
+                                <div class="mt-4">
+                                    <h5 class="font-semibold text-md mb-2">Live Demo: 'Lazos' Project Indicators Dashboard (Zoomed)</h5>
+                                    <div class="iframe-scaled-container bg-gray-200 rounded-md">
+                                        <iframe title="REPORTE INDICADORES_LAZOS_ASDI" src="https://app.powerbi.com/view?r=eyJrIjoiOTE4NDJjM2UtNTVkMi00OWYzLTlkMmQtMDNjMWUyOTIxZGJkIiwidCI6IjI5ZTcxNGQ0LTRiNTYtNDlmOC04OTA0LWJjYjczNzg3Mjc2ZSJ9" frameborder="0" allowFullScreen="true"></iframe>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h4 class="font-semibold">3. Promoting a Learning Culture</h4>
+                                <p class="text-sm text-gray-600">I designed and implemented the Knowledge Management Strategy for the Colombia office, a model that became a pivot for the entire region. The strategy is based on an iterative cycle: 1) Identification of good practices, 2) Systematization, 3) Exchange & Reflection, and 4) Innovation and Scaling. A key product of this was the "Tejiendo Redes" systematization report, which capitalized on lessons learned from the SUFASEC program.</p>
+                                <div class="mt-4 text-sm">
+                                    <p class="font-semibold mb-2">Key Deliverables:</p>
+                                    <ul class="list-disc list-inside space-y-1">
+                                        <li><a href="https://drive.google.com/file/d/1SFM5oA9Khvan9DjHORzMKw_KD7w2SlOK/view?usp=drive_link" target="_blank" class="hover:underline" style="color: var(--accent-warm);">Knowledge Management Strategy Document</a></li>
+                                        <li><a href="https://drive.google.com/file/d/17cjYCvRX9hpe1PcTUrL_vd2NTe9oB4gU/view?usp=drive_link" target="_blank" class="hover:underline" style="color: var(--accent-warm);">'Tejiendo Redes' Systematization Report</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                             <div>
+                                <h4 class="font-semibold">4. Leading Strategic Financial Monitoring</h4>
+                                <p class="text-sm text-gray-600">I engineered an innovative regional ERP budgeting tool that integrated project budgets with the VISUAL accounting system via SQL. This tool provided real-time analysis of cost coverage and budget execution, enabling data-driven financial decision-making that resulted in a 50% increase in resource allocation efficiency.</p>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
-        </section>
-
-    </main>
-    
-    <footer class="bg-gray-100 border-t border-gray-200">
-        <div class="container mx-auto px-6 py-8 text-center text-gray-600">
-            <p class="font-bold">Miguel Angel Arciénega Avilés</p>
-            <p class="text-sm">marcienega@outlook.com | (+591) 72869924</p>
-            <a href="https://www.linkedin.com/in/m-arcienega" target="_blank" class="text-sm text-[#C57B57] hover:underline">LinkedIn Profile</a>
-        </div>
-    </footer>
-
-<script>
-const projectsData = [
-    {
-        id: 1,
-        title: 'Behavioural Research in Complex Environments',
-        organization: 'CONEXIÓN',
-        program: 'SUFASEC',
-        category: 'behavioral',
-        context: 'The SUFASEC program operates in Bolivia, Colombia, and Guatemala, involving multiple partners to strengthen child protection systems. The challenge was to move beyond traditional monitoring to understand the root causes of change. The goal was not only to measure progress against indicators but to understand what behavioral changes were occurring among youth and communities and why.',
-        action: 'I designed and implemented a mixed-methods M&E system that functioned as a behavioral research engine:<ul><li class="mt-2 ml-4 list-disc"><b>Quantitative Tracking:</b> I managed and consolidated partner data through standardized templates.</li><li class="mt-2 ml-4 list-disc"><b>Qualitative Research:</b> I led the adoption of the Outcome Harvesting methodology to identify, document, and validate "signals" of behavioral change not captured by formal indicators.</li><li class="mt-2 ml-4 list-disc"><b>Analysis and Visualization:</b> I centralized the information in Power BI dashboards to cross-reference quantitative data with qualitative findings, transforming complex data into actionable insights.</li></ul>',
-        result: 'A key finding was that the trust built by a specific local partner was a stronger predictor of behavioral change than direct incentives. This insight, validated through Outcome Harvesting, allowed the alliance to recommend that partners prioritize trust-building strategies, thereby improving program effectiveness.',
-        evidence: [
-            { name: 'Indicator Dashboard (Power BI)', url: 'https://app.powerbi.com/view?r=eyJrIjoiMDE2M2VlYTctOWJjNy00YmQwLThhMmMtNjkyNzMwYjk5MWQ5IiwidCI6IjI5ZTcxNGQ0LTRiNTYtNDlmOC04OTA0LWJjYjczNzg3Mjc2ZSJ9' },
-            { name: 'Methodological Tool (Google Sheets)', url: 'https://docs.google.com/spreadsheets/d/1i_5N9i5YzXUlYwwXkviJBWJECssM0TSHYYzVQfjR2Pg/edit?usp=drive_link' },
-        ]
-    },
-    {
-        id: 2,
-        title: 'Developing Methodologies for Sustainable Change',
-        organization: 'FAO',
-        program: 'Amazonía Emprendedora',
-        category: 'systems',
-        context: 'The program aimed to strengthen 30 community enterprises in the Bolivian Amazon, ensuring that support fostered long-term sustainable business and resource management practices.',
-        action: 'I co-authored and implemented the "Amazonía Emprendedora" methodology. My role included designing the financial viability and market components, directly training the 30 enterprises to internalize behaviors like long-term planning, and monitoring the adoption of the taught practices.',
-        result: 'The methodology became a replicable asset. We achieved that 85% of the supported enterprises reached profitability within two years. The behavioral approach of the training ensured that entrepreneurs developed new management skills, guaranteeing sustainability beyond the project\'s lifespan.',
-        evidence: [
-            { name: 'Final Consultancy Report (Google Drive)', url: 'https://drive.google.com/file/d/19DdOtP9ItpXepP7Ch2zjJsHYmOJM2_JN/view?usp=sharing' },
-            { name: 'Methodological Guide', url: '#' }
-        ]
-    },
-    {
-        id: 3,
-        title: 'Technical Rigor in Impact Evaluation',
-        organization: 'EMPODERAR PAR III',
-        program: 'Productive Alliances',
-        category: 'evaluation',
-        context: 'My task was to assess the viability of productive alliance plans before their co-financing, applying a rigorous methodology to ensure public investment would generate real impact.',
-        action: 'I applied a quasi-experimental analysis, evaluating each plan under "with project" and "without project" scenarios to isolate the intervention\'s impact. I also conducted sensitivity analyses on key variables (prices, costs) to understand how behavioral and market factors could affect viability.',
-        result: 'I evaluated over 20 alliance plans, providing an objective basis for investment decisions. My analysis identified weaknesses in the behavioral assumptions of producers, which led to adjustments in the plans before their approval, mitigating risks.',
-        evidence: [
-            { name: 'Reference Documents', url: '#' }
-        ]
-    },
-    {
-        id: 4,
-        title: 'Comprehensive Project and Knowledge Management',
-        organization: 'CONEXIÓN',
-        program: 'Lazos Project',
-        category: 'systems',
-        context: 'To ensure learning in multi-component projects like "Lazos" (focused on agrifood and climate change), it was crucial to design a complete data and knowledge lifecycle.',
-        action: 'I implemented a comprehensive system covering: data collection tool design, Power BI visualization, narrative reporting, impact communication through "Stories," and the design of the "Knowledge Management Strategy" for Conexión Colombia.',
-        result: 'This holistic approach ensured that data was transformed into useful information for management, reporting, communication, and organizational learning, improving the overall efficiency and impact of the interventions.',
-        evidence: [
-            { name: 'Tracking Tool', url: 'https://docs.google.com/spreadsheets/d/1pvpyj1N8YFzyWPKEesoC9BMBcBWz9wa0UJy5MaxJ2sY/edit?gid=0#gid=0' },
-            { name: 'Dashboard (Power BI)', url: 'https://app.powerbi.com/view?r=eyJrIjoiOTE4NDJjM2UtNTVkMi00OWYzLTlkMmQtMDNjMWUyOTIxZGJkIiwidCI6IjI5ZTcxNGQ0LTRiNTYtNDlmOC04OTA0LWJjYjczNzg3Mjc2ZSJ9' },
-            { name: 'Final Report', url: 'https://docs.google.com/document/d/1lPtyDUMMHE7InaBVyeWVeUGHtOIFB-8F/edit?usp=sharing' },
-            { name: 'Impact Stories', url: 'https://www.canva.com/design/DAGjTD3xkj4/ZizvJQErU2LCTIEh9ZadeQ/view' },
-            { name: 'Strategic Document', url: 'https://drive.google.com/file/d/1FnAu-zqQl9ciMALgpP_lzdr8KEEH6o8c/view?usp=sharing' },
-        ]
-    },
-    {
-        id: 5,
-        title: 'Design of Comprehensive Monitoring Systems',
-        organization: 'UNODC',
-        program: 'Intervention Projects',
-        category: 'systems',
-        context: 'In my current role, I am responsible for designing and operating monitoring systems for intervention projects in sensitive environments.',
-        action: 'I have designed a comprehensive monitoring system that includes: continuous monitoring of activities and indicator progress, field supervision, partner coordination, support for external evaluations, and knowledge management.',
-        result: 'This structured system has provided a clear, up-to-date view of project progress, facilitating early identification of deviations and corrective decision-making, and has established a culture of continuous learning.',
-        evidence: []
-    },
-    {
-        id: 6,
-        title: 'Project Evaluation in the Energy Sector',
-        organization: 'OLADE',
-        program: 'Rural Electrification',
-        category: 'evaluation',
-        context: 'I was hired to conduct the final evaluation of the "Rural Electrification in Isolated Areas in Bolivia" project. The challenge was to objectively measure the results and impacts of an electrification initiative using international evaluation criteria.',
-        action: 'I developed a comprehensive evaluation plan, including a stakeholder analysis and a detailed evaluation matrix. I designed and applied mixed-methods data collection instruments using Kobo Toolbox for fieldwork. Finally, I processed and analyzed the data to evaluate the project against the five DAC criteria: Relevance, Effectiveness, Efficiency, Impact, and Sustainability.',
-        result: 'The final evaluation report provided OLADE with a clear analysis of the project\'s achievements and challenges. My recommendations informed the design of future rural electrification interventions, highlighting the need to strengthen community sustainability models.',
-        evidence: [
-            { name: 'Final Report', url: '#' }
-        ]
-    }
-];
-
-document.addEventListener('DOMContentLoaded', () => {
-    const projectGrid = document.getElementById('project-grid');
-    const projectDetailsContainer = document.getElementById('project-details-container');
-    const filterButtons = document.querySelectorAll('.filter-btn');
-    let activeCard = null;
-
-    function displayProjectDetails(projectId) {
-        const project = projectsData.find(p => p.id === projectId);
-        if (!project) return;
-        
-        let evidenceHTML = project.evidence.length > 0 ? 
-            `<h4 class="font-semibold text-gray-700 mt-6 mb-2">Evidence & Resources:</h4>
-             <ul class="space-y-2">` +
-            project.evidence.map(e => `
-                <li>
-                    <a href="${e.url}" target="_blank" class="text-sm text-[#C57B57] hover:underline flex items-center">
-                        ${e.name}
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
-                    </a>
-                </li>`).join('') + `</ul>` : '<p class="text-sm text-gray-400 mt-4">Evidence for this project is confidential or available upon request.</p>';
-
-        projectDetailsContainer.innerHTML = `
-            <h3 class="text-2xl font-bold text-[#3E3636]">${project.title}</h3>
-            <p class="text-sm text-gray-500 mb-4">${project.organization} | ${project.program}</p>
-            <div>
-                <h4 class="font-semibold text-gray-700 mb-2">Context:</h4>
-                <p class="text-gray-600 text-sm leading-relaxed">${project.context}</p>
-                <h4 class="font-semibold text-gray-700 mt-4 mb-2">Action:</h4>
-                <div class="text-gray-600 text-sm leading-relaxed">${project.action}</div>
-                <h4 class="font-semibold text-gray-700 mt-4 mb-2">Result:</h4>
-                <p class="text-gray-600 text-sm leading-relaxed font-medium">${project.result}</p>
-                ${evidenceHTML}
-            </div>`;
-    }
-
-    function renderProjects(filter = 'all') {
-        projectGrid.innerHTML = '';
-        const filteredProjects = filter === 'all' ? projectsData : projectsData.filter(p => p.category === filter);
-
-        filteredProjects.forEach(project => {
-            const card = document.createElement('div');
-            card.className = 'project-card bg-white p-6 rounded-lg shadow-md border border-gray-100 cursor-pointer';
-            card.dataset.id = project.id;
-            card.innerHTML = `
-                <h3 class="font-bold text-lg text-[#3E3636]">${project.title}</h3>
-                <p class="text-sm text-gray-500 mt-1">${project.organization}</p>
-                <p class="text-xs text-gray-400 mt-2">${project.context.substring(0, 100)}...</p>
-            `;
-            card.addEventListener('click', () => {
-                const projectId = parseInt(card.dataset.id);
-                displayProjectDetails(projectId);
-
-                if (activeCard) {
-                    activeCard.classList.remove('ring-2', 'ring-[#C57B57]');
-                }
-                card.classList.add('ring-2', 'ring-[#C57B57]');
-                activeCard = card;
-            });
-            projectGrid.appendChild(card);
-        });
-        
-        if (filteredProjects.length > 0 && !activeCard) {
-            projectGrid.firstChild.click();
-        } else if (filteredProjects.length === 0) {
-             projectDetailsContainer.innerHTML = `<p class="text-center text-gray-500">No projects found for this category.</p>`;
-        }
-    }
-    
-    filterButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            filterButtons.forEach(btn => btn.classList.remove('active'));
-            button.classList.add('active');
-            activeCard = null;
-            projectDetailsContainer.innerHTML = `<p class="text-center text-gray-500">Select a project to see the details here.</p>`;
-            renderProjects(button.dataset.filter);
-        });
-    });
-
-    renderProjects();
-
-    const expertiseCtx = document.getElementById('expertiseChart').getContext('2d');
-    new Chart(expertiseCtx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Systems & Management', 'Impact Evaluation', 'Behavioral Research'],
-            datasets: [{
-                data: [3, 2, 1],
-                backgroundColor: ['#E3D5CA', '#C57B57', '#8A6F62'],
-                borderColor: '#FDFBF8',
-                borderWidth: 4
-            }]
+                    <div>
+                        <h3 class="font-semibold text-lg mb-2" style="color: var(--accent-warm);">🚀 The Measurable Impact</h3>
+                        <p>The implementation of this integrated MEL system yielded transformative results: the regional leadership gained a consolidated, real-time portfolio view for the first time; **resource allocation efficiency improved by 50%** due to data-driven insights; and a culture of evidence-based learning was established within the country teams.</p>
+                    </div>
+                </div>`
         },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom',
+        "unodc": {
+            category: "data ecosystems",
+            organization: "UNODC",
+            title: "M&E and Data Intelligence for a +$15M Portfolio",
+            content: `
+                 <div class="space-y-6 text-gray-700">
+                    <div>
+                        <h3 class="font-semibold text-lg mb-2" style="color: var(--accent-warm);">🎯 The Programmatic Challenge</h3>
+                        <p>The UNODC Bolivia office, managing a diverse and complex portfolio of over $15M, required a strategic M&E function to standardize monitoring across projects, enhance data quality for decision-making, build the technical capacity of program teams, and provide real-time oversight of both programmatic and financial performance.</p>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-lg mb-2" style="color: var(--accent-warm);">💡 My Strategic Solution & Key Deliverables</h3>
+                        <p class="mb-4">As the M&E Expert, my role was to establish and lead this strategic function, transforming M&E from a simple reporting task into a core component of program intelligence. My achievements included:</p>
+                        
+                        <div class="border-l-4 pl-4 space-y-6" style="border-color: var(--accent-warm);">
+                            <div>
+                                <h4 class="font-semibold">1. Monitoring Framework Architecture</h4>
+                                <p class="text-sm text-gray-600">I designed and implemented the complete Results-Based Management (RBM) monitoring framework for the flagship Alternative Development program. This involved defining a clear results chain, establishing key performance indicators, and creating data collection protocols to measure impact in areas like behavioral change and market access.</p>
+                            </div>
+
+                            <div>
+                                <h4 class="font-semibold">2. Capacity Building & Team Collaboration</h4>
+                                <p class="text-sm text-gray-600">I designed and facilitated M&E workshops and provided continuous technical support to over 5 project teams. This strengthened their skills in data collection, analysis, and the use of UN-specific reporting tools (like IPMR), leading to a significant improvement in the quality and consistency of program reporting through enhanced collaboration.</p>
+                            </div>
+                            
+                            <div>
+                                <h4 class="font-semibold">3. Innovative Data Visualization (Power BI) & Financial Oversight</h4>
+                                <p class="text-sm text-gray-600">I developed and deployed a suite of interactive Power BI dashboards that provided leadership with an unprecedented real-time view of the entire portfolio's financial health. These tools tracked key metrics like budget execution (delivery rate) and procurement status, transforming complex financial data into actionable insights and enabling strategic resource allocation.</p>
+                            </div>
+                            <img src="https://drive.google.com/uc?id=1oDUDXDWO5yxo3jruTAoSj8xSXar5YddY" alt="UNODC Data Management & M&E Dashboard" class="mt-4 w-full rounded-lg shadow-md border">
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-lg mb-2" style="color: var(--accent-warm);">🚀 The Measurable Impact</h3>
+                        <p>This strategic M&E approach provided the Country Representative with clear, real-time visibility into the portfolio's performance, enabling more agile and evidence-based management. The capacity-building initiatives led to a notable improvement in reporting quality, and the Power BI dashboards were instrumental in identifying bottlenecks and optimizing resource allocation.</p>
+                    </div>
+                </div>
+            `
+        },
+        "fao": {
+            category: "ecosystems inclusion climate",
+            organization: "FAO",
+            title: "Fostering Sustainable Entrepreneurial Ecosystems",
+            content: `
+                <div class="space-y-6 text-gray-700">
+                    <div>
+                        <h3 class="font-semibold text-lg mb-2" style="color: var(--accent-warm);">🎯 The Programmatic Challenge</h3>
+                        <p>The GISBA program aimed to strengthen the community-based economy in the Bolivian Amazon as a strategy for <strong>climate change adaptation</strong>. The core challenge was empowering local and indigenous communities, who had limited access to markets and finance, to transform non-timber forest resources into viable, sustainable enterprises that could generate stable income.</p>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-lg mb-2" style="color: var(--accent-warm);">💡 My Strategic Solution & Key Deliverables</h3>
+                        <p class="mb-4">As the program's Financial Specialist, I led the <strong>entrepreneurial ecosystem strengthening</strong> and <strong>financial inclusion</strong> component. My achievements centered on providing technical assistance throughout the entire business cycle, from ideation to market access. My key deliverables were:</p>
+                        
+                        <div class="border-l-4 pl-4 space-y-6" style="border-color: var(--accent-warm);">
+                            <div>
+                                <h4 class="font-semibold">1. Business Plan Architecture & Implementation</h4>
+                                <p class="text-sm text-gray-600">I architected and supported the implementation of <strong>30+ community business plans</strong> across key sustainable value chains, including:</p>
+                                <ul class="list-disc list-inside text-sm text-gray-600 mt-2">
+                                    <li>Brazil Nuts (Castaña)</li>
+                                    <li>Asaí & Native Fruits</li>
+                                    <li>Wild Cacao</li>
+                                    <li>Beekeeping (Apiculture)</li>
+                                </ul>
+                            </div>
+
+                            <div>
+                                <h4 class="font-semibold">2. Financial Inclusion Strategy</h4>
+                                <p class="text-sm text-gray-600">I designed and managed the program's <strong>"Seed Fund"</strong>, a critical financial mechanism that provided initial capital to launch and strengthen these community enterprises, overcoming a major barrier to entry.</p>
+                            </div>
+                            
+                            <div>
+                                <h4 class="font-semibold">3. Knowledge Management & Capacity Building System</h4>
+                                <p class="text-sm text-gray-600">I co-authored and developed the <strong>"Amazonía Emprendedora" methodology</strong>, a comprehensive guide for training facilitators in the creation of sustainable, community-based enterprises. This served as the program's core knowledge management tool, ensuring the approach could be replicated and scaled.</p>
+                            </div>
+
+                             <div>
+                                <h4 class="font-semibold">4. M&E for Financial Sustainability</h4>
+                                <p class="text-sm text-gray-600">I conducted the ongoing monitoring and evaluation of the financial performance of the supported enterprises, linking their viability to the program's overall impact indicators and providing crucial data for adaptive management.</p>
+                            </div>
+                        </div>
+                         <div class="mt-6 text-sm">
+                            <p class="font-semibold mb-2">Key Deliverables:</p>
+                            <ul class="list-disc list-inside space-y-1">
+                                <li><a href="https://drive.google.com/file/d/1Z2x7OTqcBDKYKxuS5KRe7xzQ28v3GH15/view?usp=drive_link" target="_blank" class="hover:underline" style="color: var(--accent-warm);">Final Technical Support Report</a></li>
+                                <li><a href="https://drive.google.com/file/d/1z93y_DqJRq_xdtm3nZ1SicrfJUeqxrkO/view?usp=drive_link" target="_blank" class="hover:underline" style="color: var(--accent-warm);">'Amazonía Emprendedora' Methodological Guide</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-lg mb-2" style="color: var(--accent-warm);">🚀 The Measurable Impact</h3>
+                        <p>This intervention successfully established a thriving ecosystem of community-based enterprises. My work directly contributed to <strong>strengthening the economic resilience of hundreds of families</strong> in the Amazon region. Furthermore, the "Amazonía Emprendedora" guide remains a lasting asset, institutionalizing the program's knowledge and providing a sustainable framework for future development initiatives.</p>
+                    </div>
+                </div>
+            `
+        },
+         "empoderar": {
+            category: "ecosystems inclusion",
+            organization: "EMPODERAR (World Bank)",
+            title: "Financial Viability Assessment of Agricultural Projects",
+            content: `
+                <div class="space-y-6 text-gray-700">
+                    <div>
+                        <h3 class="font-semibold text-lg mb-2" style="color: var(--accent-warm);">🎯 The Challenge</h3>
+                        <p>The EMPODERAR PAR III program, financed by the <strong>World Bank</strong>, required an independent, rigorous technical opinion to ensure that its investments in agricultural sub-projects were financially viable, sustainable, and would generate a real economic impact for participating families before disbursing funds.</p>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-lg mb-2" style="color: var(--accent-warm);">💡 My Strategic Solution & Key Deliverables</h3>
+                        <p class="mb-4">As an external Financial Evaluation Consultant, I provided an impartial, evidence-based assessment for 20 sub-projects. My key deliverables included:</p>
+                        <div class="border-l-4 pl-4 space-y-4" style="border-color: var(--accent-warm);">
+                            <div>
+                                <h4 class="font-semibold">1. Comprehensive Financial Modeling</h4>
+                                <p class="text-sm text-gray-600">For each plan, I developed detailed financial models, applying a comparative analysis of scenarios "with and without the project" to isolate the expected impact of the investment.</p>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold">2. Portfolio of Evaluated Sub-Projects</h4>
+                                <p class="text-sm text-gray-600">The 20 evaluated plans covered a diverse range of agricultural value chains, including:</p>
+                                <ul class="list-disc list-inside text-xs text-gray-500 mt-2 pl-4">
+                                    <li>Potato Production & Commercialization</li>
+                                    <li>Amaranth Production Improvement</li>
+                                    <li>Beekeeping & Honey Production</li>
+                                    <li>Avocado & Fruit Production</li>
+                                    <li>Dairy & Livestock Improvement</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold">3. Final Viability Certification Report</h4>
+                                <p class="text-sm text-gray-600">My final report provided the necessary technical backing and justification for management to confidently approve fund disbursement.</p>
+                            </div>
+                        </div>
+                         <div class="mt-6 p-4 rounded-lg bg-gray-50 border">
+                            <h4 class="font-semibold text-center text-gray-700 mb-2">Evaluated Portfolio Overview</h4>
+                             <p class="text-xs text-center text-gray-500 mb-4">(Investment vs. Profitability vs. Families Impacted)</p>
+                            <div class="w-full mx-auto" style="height: 250px;">
+                                <canvas id="empoderarBubbleChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                         <div class="mt-6 text-sm">
+                            <p class="font-semibold mb-2">Key Deliverable:</p>
+                            <ul class="list-disc list-inside space-y-1">
+                                <li><a href="https://docs.google.com/document/d/1J8NoSE1GB6t3emXC9lxcnN1IdTx037XTMxc6BNy98HM/edit?usp=drive_link" target="_blank" class="hover:underline" style="color: var(--accent-warm);">Financial Evaluation Summary Report</a></li>
+                            </ul>
+                        </div>
+                        <h3 class="font-semibold text-lg mb-2 mt-6" style="color: var(--accent-warm);">🚀 The Measurable Impact</h3>
+                        <p>My financial certification directly enabled the responsible allocation of <strong>$1.8 Million USD</strong> in project investments. This funding is projected to significantly increase the income and resilience of <strong>483 producer families</strong>, contributing to the program's long-term sustainability strategy.</p>
+                    </div>
+                </div>
+            `
+        },
+        "olade": {
+            category: "data",
+            organization: "OLADE",
+            title: "Final Project Evaluation using OECD/DAC Criteria",
+            content: `
+                <div class="space-y-6 text-gray-700">
+                    <div>
+                        <h3 class="font-semibold text-lg mb-2" style="color: var(--accent-warm);">🎯 The Challenge</h3>
+                        <p>The Latin American Energy Organization (OLADE) required an independent final evaluation of its rural electrification project in Bolivia. The objective was to rigorously assess the project's performance, measure its real impact and sustainability, and extract key lessons learned to inform the design of future energy initiatives in the region.</p>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-lg mb-2" style="color: var(--accent-warm);">💡 My Strategic Solution & Key Deliverables</h3>
+                        <p class="mb-4">As the lead External Evaluation Consultant, I designed and executed a comprehensive evaluation plan from start to finish. My deliverables included:</p>
+                        <ul class="list-disc list-inside text-sm text-gray-600 space-y-2">
+                            <li><strong>Evaluation Methodology Design:</strong> Developed the complete evaluation framework, including the evaluation matrix, based on the five internationally recognized <strong>OECD/DAC criteria</strong>.</li>
+                            <li><strong>Mixed-Methods Data Collection:</strong> Designed data collection tools, including surveys deployed via <strong>Kobo Toolbox</strong> for quantitative data and structured interview guides for qualitative insights.</li>
+                            <li><strong>Final Evaluation Report:</strong> Authored the final report with a clear, evidence-based analysis of the findings and provided actionable, strategic recommendations.</li>
+                        </ul>
+                         <div class="mt-6 p-4 rounded-lg bg-gray-50 border">
+                            <h4 class="font-semibold text-center text-gray-700 mb-4">Project Performance Summary (OECD/DAC Criteria)</h4>
+                            <div class="w-full max-w-sm mx-auto">
+                                <canvas id="oecdRadarChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                         <div class="mt-6 text-sm">
+                            <p class="font-semibold mb-2">Key Deliverable:</p>
+                            <ul class="list-disc list-inside space-y-1">
+                                <li><a href="https://drive.google.com/file/d/1Jw7c1Vfx-uaVOOjWmlrfa7HFu6bgZBtx/view?usp=drive_link" target="_blank" class="hover:underline" style="color: var(--accent-warm);">Final Evaluation Report</a></li>
+                            </ul>
+                        </div>
+                        <h3 class="font-semibold text-lg mb-2 mt-6" style="color: var(--accent-warm);">🚀 The Measurable Impact</h3>
+                        <p>My evaluation report provided OLADE's leadership with a definitive analysis of the project's successes and challenges. The recommendations directly contributed to their strategic planning process, ensuring that lessons learned were incorporated into the next cycle of regional energy projects.</p>
+                    </div>
+                </div>
+            `
+        },
+        "socodevi": {
+            category: "data",
+            organization: "SOCODEVI",
+            title: "Data Systematization for Nutritional Impact Analysis",
+            content: `
+                <div class="space-y-6 text-gray-700">
+                    <div>
+                        <h3 class="font-semibold text-lg mb-2" style="color: var(--accent-warm);">🎯 The Challenge</h3>
+                        <p>SOCODEVI had collected a vast amount of primary field data from a food security project survey but lacked the capacity to process it. The raw data could not answer the project's most critical question: "To what extent are we improving the nutritional status of women and children?" Without this analysis, the project's impact remained unmeasured.</p>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-lg mb-2" style="color: var(--accent-warm);">💡 My Strategic Solution & Key Deliverables</h3>
+                        <p class="mb-4">As a Data Analysis Consultant, my mission was to transform this raw data into actionable insights. I designed and executed a complete data systematization workflow, from cleaning and validation to the final calculation of complex nutritional indicators. My deliverables included:</p>
+                        <ul class="list-disc list-inside text-sm text-gray-600 space-y-2">
+                            <li><strong>Data Structuring and Cleaning:</strong> Processed and validated primary survey databases to structure the information for analysis.</li>
+                            <li><strong>Development of Calculation Models:</strong> Built the analytical models in MS Excel to calculate complex indicators like the "Minimum Acceptable Diet" (MAD).</li>
+                            <li><strong>Final Analytical Report:</strong> Authored a comprehensive report that translated complex data into clear findings, providing a definitive measure of the project's performance.</li>
+                        </ul>
+                         <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div class="text-center p-4 rounded-lg bg-gray-50 border">
+                                <h4 class="font-semibold text-gray-700 text-sm">Min. Acceptable Diet (Children)</h4>
+                                <canvas id="madChart" class="mx-auto" style="max-width: 120px; max-height: 120px;"></canvas>
+                            </div>
+                            <div class="text-center p-4 rounded-lg bg-gray-50 border">
+                                <h4 class="font-semibold text-gray-700 text-sm">Dietary Diversity (Women)</h4>
+                                <canvas id="diversityChart" class="mx-auto" style="max-width: 120px; max-height: 120px;"></canvas>
+                            </div>
+                            <div class="text-center p-4 rounded-lg bg-gray-50 border">
+                                <h4 class="font-semibold text-gray-700 text-sm">Meal Frequency (Children)</h4>
+                                <canvas id="frequencyChart" class="mx-auto" style="max-width: 120px; max-height: 120px;"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-lg mb-2" style="color: var(--accent-warm);">🚀 The Measurable Impact</h3>
+                        <p>My analysis provided SOCODEVI with the first clear, evidence-based measurement of their project's nutritional impact. Key findings, such as revealing that only <strong>46% of children met the "Minimum Acceptable Diet"</strong> standard, gave the organization a crucial baseline to assess their effectiveness and make informed strategic decisions for future interventions.</p>
+                    </div>
+                </div>
+            `
+        },
+        "molino": {
+            category: "ecosystems",
+            organization: "MOLINO ANDINO S.A.",
+            title: "Crafting a Business Plan for a $7.3M Expansion",
+            content: `
+                <div class="space-y-6 text-gray-700">
+                    <div>
+                        <h3 class="font-semibold text-lg mb-2" style="color: var(--accent-warm);">🎯 The Challenge</h3>
+                        <p>Molino Andino S.A., a leading food production company, aimed to solidify its national market leadership through a major expansion. The challenge was to develop a comprehensive, data-driven, and bankable business plan that could justify a multi-million dollar investment and ensure long-term profitability.</p>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-lg mb-2" style="color: var(--accent-warm);">💡 My Strategic Solution & Key Deliverables</h3>
+                        <p class="mb-4">As the lead Project Analyst, I architected the complete business plan, transforming raw market data into a strategic roadmap for growth. My deliverables included:</p>
+                        <ul class="list-disc list-inside text-sm text-gray-600 space-y-2">
+                            <li><strong>In-depth Market Analysis:</strong> Conducted extensive research on the national market, including competitor analysis and demand forecasting.</li>
+                            <li><strong>Financial Modeling & Viability Assessment:</strong> Developed the complete economic model, projecting cash flows and calculating key investment indicators (ROI, NPV, IRR).</li>
+                            <li><strong>Strategic Growth Roadmap:</strong> Authored the comprehensive business plan detailing the business model, marketing strategy, and operational plan.</li>
+                        </ul>
+                         <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="text-center p-4 rounded-lg bg-gray-50 border">
+                                <h4 class="font-semibold text-gray-700">Projected ROI</h4>
+                                <canvas id="roiChart" class="mx-auto" style="max-width: 150px; max-height: 150px;"></canvas>
+                            </div>
+                            <div class="text-center p-4 rounded-lg bg-gray-50 border">
+                                <h4 class="font-semibold text-gray-700">Market Share Increase</h4>
+                                <canvas id="marketShareChart" class="mx-auto" style="max-width: 150px; max-height: 150px;"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-lg mb-2" style="color: var(--accent-warm);">🚀 The Measurable Impact</h3>
+                        <p>My analysis and the resulting business plan provided the company's leadership with the evidence-based foundation needed to approve a <strong>$7.3 Million USD investment</strong>. The plan projected a <strong>25% Return on Investment (ROI)</strong> and a potential <strong>15% increase in market share</strong>, directly contributing to the company's strategic decision-making process for sustainable growth.</p>
+                    </div>
+                </div>
+            `
+        }
+    };
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const projectGallery = document.getElementById('project-gallery');
+        const modalContainer = document.getElementById('modal-container');
+        
+        for (const key in projectsData) {
+            const project = projectsData[key];
+            const card = document.createElement('div');
+            card.className = 'project-card rounded-lg overflow-hidden shadow-md cursor-pointer';
+            card.setAttribute('data-category', project.category);
+            card.setAttribute('data-modal-id', key); // Use a specific attribute for the modal ID
+            card.innerHTML = `
+                <div class="p-6">
+                    <p class="text-sm" style="color: var(--accent-warm);">${project.organization}</p>
+                    <h3 class="text-xl font-semibold mt-1" style="color: var(--text-dark);">${project.title}</h3>
+                </div>`;
+            projectGallery.appendChild(card);
+            
+            const modal = document.createElement('div');
+            modal.id = `${key}-modal`;
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center p-4 z-50';
+            modal.innerHTML = `
+                <div class="modal-content rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto p-8 relative">
+                    <button class="close-modal absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-3xl font-bold">&times;</button>
+                    <h2 class="text-2xl font-bold mb-6" style="color: var(--text-dark);">${project.organization}: ${project.title}</h2>
+                    ${project.content}
+                </div>`;
+            modalContainer.appendChild(modal);
+        }
+
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const projectCards = document.querySelectorAll('.project-card');
+
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const filter = btn.getAttribute('data-filter');
+                projectCards.forEach(card => {
+                    card.style.display = (filter === 'all' || card.getAttribute('data-category').includes(filter)) ? 'block' : 'none';
+                });
+            });
+        });
+
+        projectCards.forEach(card => {
+            card.addEventListener('click', () => {
+                const modalId = card.getAttribute('data-modal-id');
+                const modal = document.getElementById(`${modalId}-modal`);
+                if(modal) {
+                    modal.style.display = 'flex';
+                    if (modalId === 'molino') initializeMolinoCharts();
+                    if (modalId === 'socodevi') initializeSocodeviCharts();
+                    if (modalId === 'olade') initializeOladeChart();
+                    if (modalId === 'empoderar') initializeEmpoderarChart();
+                }
+            });
+        });
+
+        const closeModal = (modal) => {
+            if (modal) {
+                modal.style.display = 'none';
+                currentCharts.forEach(chart => chart.destroy());
+                currentCharts = [];
+            }
+        };
+
+        modalContainer.addEventListener('click', function(e) {
+            if (e.target.closest('.close-modal')) {
+                closeModal(e.target.closest('[id$="-modal"]'));
+            } else if (e.target.matches('[id$="-modal"]')) {
+                closeModal(e.target);
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === "Escape") {
+                document.querySelectorAll('[id$="-modal"]').forEach(closeModal);
+            }
+        });
+        
+        function createDoughnutChart(ctx, data, text) {
+            return new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Achieved', ''],
+                    datasets: [{
+                        data: data,
+                        backgroundColor: ['#C57B57', '#F1F1F1'],
+                        borderColor: ['#C57B57', '#F1F1F1'],
+                        borderWidth: 1,
+                        circumference: 270,
+                        rotation: 225,
+                    }]
                 },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            let label = context.label || '';
-                            if (label) {
-                                label += ': ';
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { enabled: false },
+                        title: { display: true, text: text, font: { size: 20, weight: 'bold' }, color: '#3F3F3F', position: 'bottom' }
+                    }
+                }
+            });
+        }
+
+        function initializeMolinoCharts() {
+            currentCharts.forEach(chart => chart.destroy());
+            currentCharts = [];
+            const roiChart = createDoughnutChart(document.getElementById('roiChart').getContext('2d'), [25, 75], '25%');
+            const marketShareChart = createDoughnutChart(document.getElementById('marketShareChart').getContext('2d'), [15, 85], '+15%');
+            currentCharts.push(roiChart, marketShareChart);
+        }
+        
+        function initializeSocodeviCharts() {
+            currentCharts.forEach(chart => chart.destroy());
+            currentCharts = [];
+            const madChart = createDoughnutChart(document.getElementById('madChart').getContext('2d'), [46, 54], '46%');
+            const diversityChart = createDoughnutChart(document.getElementById('diversityChart').getContext('2d'), [68, 32], '68%');
+            const frequencyChart = createDoughnutChart(document.getElementById('frequencyChart').getContext('2d'), [89, 11], '89%');
+            currentCharts.push(madChart, diversityChart, frequencyChart);
+        }
+
+        function initializeOladeChart() {
+            currentCharts.forEach(chart => chart.destroy());
+            currentCharts = [];
+            const oecdCtx = document.getElementById('oecdRadarChart').getContext('2d');
+            const oecdRadarChart = new Chart(oecdCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['Relevance', 'Effectiveness', 'Efficiency', 'Impact', 'Sustainability'],
+                    datasets: [{
+                        label: 'Project Score (out of 5)',
+                        data: [5, 3, 3, 4, 3], 
+                        backgroundColor: 'rgba(197, 123, 87, 0.2)',
+                        borderColor: 'rgba(197, 123, 87, 1)',
+                        pointBackgroundColor: 'rgba(197, 123, 87, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(197, 123, 87, 1)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(63, 63, 63, 0.2)' },
+                            grid: { color: 'rgba(63, 63, 63, 0.2)' },
+                            pointLabels: { font: { size: 12 }, color: '#3F3F3F' },
+                            ticks: {
+                                backdropColor: 'transparent',
+                                color: '#6B7280',
+                                stepSize: 1,
+                                max: 5,
+                                min: 0
                             }
-                            if (context.parsed !== null) {
-                                label += context.parsed + ' projects';
-                            }
-                            return label;
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                             labels: { color: '#3F3F3F' }
                         }
                     }
                 }
-            }
+            });
+            currentCharts.push(oecdRadarChart);
+        }
+
+        function initializeEmpoderarChart() {
+            currentCharts.forEach(chart => chart.destroy());
+            currentCharts = [];
+            const bubbleCtx = document.getElementById('empoderarBubbleChart').getContext('2d');
+            const bubbleChart = new Chart(bubbleCtx, {
+                type: 'bubble',
+                data: {
+                    datasets: [
+                        { label: 'Potato', data: [{ x: 121738, y: 18, r: 28 }], backgroundColor: 'rgba(197, 123, 87, 0.7)'},
+                        { label: 'Amaranth', data: [{ x: 80000, y: 22, r: 20 }], backgroundColor: 'rgba(63, 63, 63, 0.7)' },
+                        { label: 'Beekeeping', data: [{ x: 50000, y: 25, r: 15 }], backgroundColor: 'rgba(107, 114, 128, 0.7)'},
+                        { label: 'Avocado', data: [{ x: 150000, y: 20, r: 35 }], backgroundColor: 'rgba(197, 123, 87, 0.5)'},
+                        { label: 'Dairy', data: [{ x: 100000, y: 17, r: 25 }], backgroundColor: 'rgba(63, 63, 63, 0.5)'}
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Investment (USD)' },
+                            ticks: { callback: function(value) { return (value / 1000) + 'k'; } }
+                        },
+                        y: {
+                            title: { display: true, text: 'Projected Profitability (TIR %)' }
+                        }
+                    },
+                    plugins: {
+                        legend: { position: 'top' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.dataset.label || '';
+                                    const investment = (context.parsed.x / 1000).toFixed(1) + 'k USD';
+                                    const tir = context.parsed.y + '%';
+                                    const families = context.raw.r;
+                                    return `${label}: ${investment}, ${tir} TIR, ${families} Families`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            currentCharts.push(bubbleChart);
         }
     });
-
-    const reachCtx = document.getElementById('reachChart').getContext('2d');
-    new Chart(reachCtx, {
-        type: 'bar',
-        data: {
-            labels: ['Enterprises Strengthened (FAO)', 'Alliance Plans Evaluated (EMPODERAR)'],
-            datasets: [{
-                label: 'Count',
-                data: [30, 20],
-                backgroundColor: ['#C57B57', '#E3D5CA'],
-                borderColor: ['#C57B57', '#E3D5CA'],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            indexAxis: 'y',
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: false
-                }
-            },
-            scales: {
-                x: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-
-    const navLinks = document.querySelectorAll('.nav-link');
-    const sections = document.querySelectorAll('main section');
-    window.addEventListener('scroll', () => {
-        let current = '';
-        sections.forEach(section => {
-            const sectionTop = section.offsetTop;
-            if (pageYOffset >= sectionTop - 60) {
-                current = section.getAttribute('id');
-            }
-        });
-
-        navLinks.forEach(link => {
-            link.classList.remove('active');
-            if (link.getAttribute('href').includes(current)) {
-                link.classList.add('active');
-            }
-        });
-    });
-
-});
-</script>
+    </script>
 </body>
 </html>
+

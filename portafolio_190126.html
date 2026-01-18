@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strategic Impact Portfolio - Miguel Angel Arciénega</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Paleta de Colores del Diseño Original */
+        :root {
+            --bg-main: #F1F1F1;
+            --text-dark: #3F3F3F;
+            --text-medium: #6B7280;
+            --accent-warm: #C57B57;
+            --bg-card: #FFFFFF;
+            --border-light: #E5E7EB;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg-main);
+            color: var(--text-dark);
+        }
+        .project-card { transition: all 0.3s ease; background-color: var(--bg-card); }
+        .project-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+        .filter-btn { background-color: var(--bg-card); color: var(--text-dark); }
+        .filter-btn.active { background-color: var(--accent-warm); color: white; }
+        .modal-content { animation: fadeIn 0.3s ease; background-color: var(--bg-card); }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        
+        /* Iframe Responsivo y Escalado */
+        .iframe-container { position: relative; width: 100%; overflow: hidden; padding-top: 56.25%; /* Aspect ratio ~16:9 */ }
+        .iframe-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+        .iframe-scaled-container { height: 380px; overflow: hidden; border: 1px solid var(--border-light); border-radius: 0.5rem; } 
+        .iframe-scaled-container iframe { 
+            width: 250%; 
+            height: 250%;
+            transform: scale(0.4); 
+            transform-origin: top left; 
+        }
+        
+        .chart-container { position: relative; height: 250px; width: 100%; }
+        /* Utility for text accent */
+        .text-accent-warm { color: var(--accent-warm); }
+    </style>
+</head>
+<body class="p-4 sm:p-8">
+
+    <!-- Contenedor principal -->
+    <div class="container mx-auto max-w-7xl">
+
+        <!-- SECCIÓN 1: Encabezado y Propuesta de Valor -->
+        <header class="text-center py-12">
+            <h1 class="text-4xl md:text-5xl font-bold tracking-tight" style="color: var(--text-dark);">Miguel Angel Arciénega Avilés</h1>
+            <!-- Título Actualizado -->
+            <p class="text-xl mt-2" style="color: var(--accent-warm);">Economic Strategy Specialist | M&E & Data Science for Development</p>
+            
+            <div class="max-w-4xl mx-auto mt-6 text-left p-6 rounded-xl shadow-sm" style="background-color: var(--bg-card); color: var(--text-medium);">
+                <p class="font-bold text-lg mb-2" style="color: var(--text-dark);">My Value Proposition:</p>
+                <!-- Propuesta de Valor Actualizada -->
+                <p>I am a Program/Project Management and Monitoring, Evaluation, and Learning (M&E) professional with over 10 years of experience driving the impact of sustainable development programs in Latin America. With 4 years in regional roles for international organizations and currently pursuing my PMP® certification, my approach is focused on designing and implementing strategies that are both programmatically sound and technically advanced. I bridge the gap between economic analysis, financial monitoring, and data science to generate high-rigor strategic inputs that facilitate decision-making for development banks and multilateral agencies.</p>
+            </div>
+
+            <div class="mt-10 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+                <div class="p-6 rounded-lg shadow-md text-center" style="background-color: var(--bg-card);">
+                    <p class="text-3xl font-bold" style="color: var(--accent-warm);">10+</p>
+                    <p class="mt-1" style="color: var(--text-medium);">Years of Experience</p>
+                </div>
+                <div class="p-6 rounded-lg shadow-md text-center" style="background-color: var(--bg-card);">
+                    <p class="text-3xl font-bold" style="color: var(--accent-warm);">$25M+</p>
+                    <p class="mt-1" style="color: var(--text-medium);">in Managed M&E Portfolios</p>
+                </div>
+                <div class="p-6 rounded-lg shadow-md text-center" style="background-color: var(--bg-card);">
+                    <p class="text-3xl font-bold" style="color: var(--accent-warm);">4</p>
+                    <p class="mt-1" style="color: var(--text-medium);">Years in Regional Roles (LATAM)</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- SECCIÓN 2: Proyectos Estratégicos -->
+        <main id="projects" class="py-12">
+             <h2 class="text-3xl font-bold text-center mb-10" style="color: var(--text-dark);">Strategic Projects</h2>
+
+            <!-- Filtros Interactivos -->
+            <div class="flex flex-wrap justify-center gap-2 mb-12">
+                <button class="filter-btn active px-4 py-2 text-sm font-medium rounded-full shadow-sm hover:opacity-80" data-filter="all">All</button>
+                <button class="filter-btn px-4 py-2 text-sm font-medium rounded-full shadow-sm hover:opacity-80" data-filter="ecosystems">Entrepreneurial Ecosystems</button>
+                <button class="filter-btn px-4 py-2 text-sm font-medium rounded-full shadow-sm hover:opacity-80" data-filter="inclusion">Financial Inclusion</button>
+                <button class="filter-btn px-4 py-2 text-sm font-medium rounded-full shadow-sm hover:opacity-80" data-filter="climate">Climate Change Adaptation</button>
+                <button class="filter-btn px-4 py-2 text-sm font-medium rounded-full shadow-sm hover:opacity-80" data-filter="data">Program & Data Management</button>
+            </div>
+            
+            <div id="project-gallery" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Las tarjetas de proyecto se generan dinámicamente con JS -->
+            </div>
+        </main>
+        
+        <!-- SECCIÓN 3: Caja de Herramientas -->
+        <footer id="tools" class="py-12 border-t" style="border-color: var(--border-light);">
+             <h2 class="text-2xl font-bold text-center mb-8" style="color: var(--text-dark);">Technical Toolbox</h2>
+            <div class="flex flex-wrap justify-center items-center gap-8" style="color: var(--text-medium);">
+                <span>Python</span> <span>R</span> <span>Power BI</span> <span>MS SQL Server</span> <span>Excel (Advanced)</span> <span>Kobo Toolbox</span>
+            </div>
+             <div class="text-center mt-12">
+                 <p style="color: var(--text-medium);">m_arcienega@outlook.com | <a href="https://www.linkedin.com/in/m-arcienega" target="_blank" class="hover:underline" style="color: var(--accent-warm);">LinkedIn Profile</a></p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Contenedor de Modales -->
+    <div id="modal-container"></div>
+
+    <script>
+    let currentCharts = []; // Variable global para almacenar instancias de gráficos
+
+    const projectsData = {
+        "unodc": {
+            category: "data ecosystems",
+            organization: "UNODC",
+            title: "M&E and Data Intelligence for a +$15M Portfolio",
+            content: `
+                <div class="space-y-8 text-gray-700">
+                    <!-- Point 1 -->
+                    <div>
+                        <h4 class="font-bold text-lg text-accent-warm mb-2">1. Monitoring Framework Architecture</h4>
+                        <p class="text-sm text-gray-600 leading-relaxed">I designed and implemented the complete Results-Based Management (RBM) monitoring framework for the flagship Alternative Development program. This involved defining a clear results chain, establishing key performance indicators, and creating data collection protocols to measure impact in areas like behavioral change and market access.</p>
+                    </div>
+
+                    <!-- Point 2 -->
+                    <div>
+                        <h4 class="font-bold text-lg text-accent-warm mb-2">2. Capacity Building & Team Collaboration</h4>
+                        <p class="text-sm text-gray-600 leading-relaxed">I designed and facilitated M&E workshops and provided continuous technical support to over 5 project teams. This strengthened their skills in data collection, analysis, and the use of UN-specific reporting tools (like IPMR), leading to a significant improvement in the quality and consistency of program reporting through enhanced collaboration.</p>
+                    </div>
+
+                    <!-- Point 3 -->
+                    <div>
+                        <h4 class="font-bold text-lg text-accent-warm mb-2">3. Portfolio Performance Report 2025 (New)</h4>
+                        <p class="text-sm text-gray-600 leading-relaxed mb-4">A data-driven assessment of the portfolio, analyzing execution rates against targets. I used Power BI to clean (ETL) and visualize financial data from Umoja & Umoja Analytics, enabling the monitoring of a <strong>$4.5M USD</strong> annual delivery goal.</p>
+                        
+                        <div class="bg-gray-50 border rounded-lg p-6">
+                            <h5 class="text-center font-semibold text-gray-700 mb-4">2025 Financial Delivery vs. Target</h5>
+                            <div class="chart-container" style="height: 300px;">
+                                <canvas id="unodcDeliveryChart"></canvas>
+                            </div>
+                            <p class="text-xs text-center text-gray-500 mt-2">Data Source: COBOL Financial Monitoring Report 2025</p>
+                        </div>
+                    </div>
+
+                    <!-- Point 4 -->
+                    <div>
+                        <h4 class="font-bold text-lg text-accent-warm mb-2">4. Economic & Political Context Analysis (New)</h4>
+                        <p class="text-sm text-gray-600 leading-relaxed mb-3">Led the technical coordination for the <strong>Common Country Analysis (CCA)</strong> input and produced a specialized study on the <strong>Energy Crisis (2020-2025)</strong>, modeling its impact on field operations to guide mitigation strategies.</p>
+                        
+                        <div class="bg-white border rounded-md p-4 shadow-sm">
+                            <p class="text-sm font-semibold mb-2">Access Strategic Documents:</p>
+                            <ul class="space-y-2 text-sm">
+                                <li>
+                                    <a href="https://drive.google.com/file/d/1cDhtwpY1SI2v0wNj88R8kx7MIezK21Uj/view?usp=drive_link" target="_blank" class="flex items-center text-accent-warm hover:underline hover:text-gray-800 transition-colors">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                        Análisis Político Económico de Bolivia
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="https://drive.google.com/file/d/1rBsTwxOhRXA6XqC1QotO6wM8NecmDMg-/view?usp=drive_link" target="_blank" class="flex items-center text-accent-warm hover:underline hover:text-gray-800 transition-colors">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                        Análisis de la Crisis Energética
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Point 5 -->
+                    <div>
+                        <h4 class="font-bold text-lg text-accent-warm mb-2">5. Annual Workplan Compliance Report (New)</h4>
+                        <p class="text-sm text-gray-600 leading-relaxed mb-4">Developed a results-based tracking methodology, achieving a <strong>73% global compliance rate</strong> and ensuring accountability to Headquarters.</p>
+                        
+                        <div class="bg-gray-50 border rounded-lg p-6">
+                            <h5 class="text-center font-semibold text-gray-700 mb-4">2025 Workplan & Operational KPIs</h5>
+                            <div class="chart-container" style="height: 250px;">
+                                <canvas id="unodcComplianceChart"></canvas>
+                            </div>
+                            <p class="text-xs text-center text-gray-500 mt-2">Aggregated performance across Programmatic, Alliance Building, and Office Management pillars.</p>
+                        </div>
+                    </div>
+
+                    <!-- Point 6 -->
+                    <div>
+                        <h4 class="font-bold text-lg text-accent-warm mb-2">6. Innovative Data Visualization (Power BI)</h4>
+                        <p class="text-sm text-gray-600 leading-relaxed">I developed interactive Power BI dashboards that provided leadership with an unprecedented real-time view of the portfolio's financial health, tracking budget execution and procurement status.</p>
+                    </div>
+                </div>
+            `
+        },
+        "conexion": {
+            category: "data ecosystems inclusion climate",
+            organization: "ICCO / CONEXIÓN",
+            title: "Architecting a Regional MEL System from Scratch",
+            content: `
+                <div class="space-y-6 text-gray-700">
+                    <div>
+                        <h3 class="font-semibold text-lg mb-2" style="color: var(--accent-warm);">🎯 The Programmatic Challenge</h3>
+                        <p>Following the organizational transition from ICCO, CONEXIÓN operated across 3 Latin American countries without a unified system to measure impact, manage knowledge, or drive data-informed decisions at a regional level.</p>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-lg mb-2" style="color: var(--accent-warm);">💡 My Strategic Solution & Key Deliverables</h3>
+                        <p class="mb-4">My role was to architect and build the entire MEL system from scratch. My actions were centered on key pillars:</p>
+                        
+                        <div class="border-l-4 pl-4 space-y-6" style="border-color: var(--accent-warm);">
+                            <div>
+                                <h4 class="font-semibold">1. Designing the Regional Monitoring System</h4>
+                                <p class="text-sm text-gray-600">First, I led the programmatic design based on RBM principles, defining the regional results framework. Then, I translated this into a technical architecture using MS SQL Server.</p>
+                                <div class="mt-4">
+                                    <h5 class="font-semibold text-md mb-2">Live Demo: Regional Indicators Dashboard</h5>
+                                    <div class="iframe-container bg-gray-200 rounded-md">
+                                        <iframe title="REPORTE INDICADORES REGIONAL CONEXIÓN" src="https://app.powerbi.com/view?r=eyJrIjoiOTU3MGQxYzgtMzk1Zi00NzUwLWJhNTItMmQwOWQ0MWMxMGU0IiwidCI6IjI5ZTcxNGQ0LTRiNTYtNDlmOC04OTA0LWJjYjczNzg3Mjc2ZSJ9" frameborder="0" allowFullScreen="true"></iframe>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h4 class="font-semibold">2. M&E Leadership on Key Projects</h4>
+                                <p class="text-sm text-gray-600">I provided direct M&E leadership for flagship regional projects like <b>Lazos (ASDI)</b> and <b>SUFASEC (DZT)</b>, ensuring compliance with IATI transparency standards.</p>
+                                <div class="mt-4">
+                                    <h5 class="font-semibold text-md mb-2">Live Demo: 'Lazos' Project Indicators Dashboard (Zoomed)</h5>
+                                    <div class="iframe-scaled-container bg-gray-200 rounded-md">
+                                        <iframe title="REPORTE INDICADORES_LAZOS_ASDI" src="https://app.powerbi.com/view?r=eyJrIjoiOTE4NDJjM2UtNTVkMi00OWYzLTlkMmQtMDNjMWUyOTIxZGJkIiwidCI6IjI5ZTcxNGQ0LTRiNTYtNDlmOC04OTA0LWJjYjczNzg3Mjc2ZSJ9" frameborder="0" allowFullScreen="true"></iframe>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h4 class="font-semibold">3. Promoting a Learning Culture</h4>
+                                <p class="text-sm text-gray-600">I designed and implemented the Knowledge Management Strategy, producing key assets like the "Tejiendo Redes" systematization report.</p>
+                            </div>
+
+                            <!-- UPDATED SECTION 4 -->
+                            <div>
+                                <h4 class="font-bold text-lg text-gray-800">4. Leading Strategic Financial Monitoring & Transition Planning</h4>
+                                <p class="text-sm text-gray-600 mb-4">I designed the <strong>Transition Business Plan (2021-2025)</strong>, modeling financial scenarios to bridge the gap between grant dependency and sustainable service revenue. The chart below illustrates the stabilization strategy.</p>
+                                
+                                <div class="chart-container bg-gray-50 rounded border p-2 mb-6" style="height: 250px;">
+                                    <canvas id="conexionBusinessPlanChart"></canvas>
+                                </div>
+
+                                <p class="text-sm text-gray-600 mb-4">To operationalize this, I engineered a regional ERP budgeting tool integrating <strong>SQL Server</strong> with <strong>Power BI</strong>. This allowed real-time tracking of execution.</p>
+
+                                <div class="space-y-6">
+                                    <div>
+                                        <h5 class="font-semibold text-sm mb-2">Live Demo: Financial Monitoring Dashboard</h5>
+                                        <div class="iframe-container bg-gray-200 rounded-md border shadow-sm">
+                                            <iframe title="FINANCIERO CONEXIÓN" src="https://app.powerbi.com/view?r=eyJrIjoiOTgyY2JhMjItZDczNS00Njg4LTk4ZjUtZmZkODVlZTI5YTY0IiwidCI6IjI5ZTcxNGQ0LTRiNTYtNDlmOC04OTA0LWJjYjczNzg3Mjc2ZSJ9" frameborder="0" allowFullScreen="true"></iframe>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h5 class="font-semibold text-sm mb-2">Live Demo: Country-Level Execution (Colombia)</h5>
+                                        <div class="iframe-container bg-gray-200 rounded-md border shadow-sm">
+                                            <iframe title="DASBOARD_CONEXION COLOMBIA" src="https://app.powerbi.com/view?r=eyJrIjoiNzA0MmRlYjktODQxZi00YjgzLWIwYjMtOTExMjcyMjJiMjdiIiwidCI6IjI5ZTcxNGQ0LTRiNTYtNDlmOC04OTA0LWJjYjczNzg3Mjc2ZSJ9&embedImagePlaceholder=true" frameborder="0" allowFullScreen="true"></iframe>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs text-center text-gray-500 italic mt-2 bg-yellow-50 p-2 rounded border border-yellow-200">
+                                        <strong>Disclaimer:</strong> Due to intellectual property and confidentiality reasons, the data presented in these visualizations has been modified or simulated and does not reflect the organization's actual financial reality.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-lg mb-2" style="color: var(--accent-warm);">🚀 The Measurable Impact</h3>
+                        <p>The implementation of this integrated MEL system yielded transformative results: the regional leadership gained a consolidated, real-time portfolio view for the first time, and resource allocation efficiency improved by 50% due to data-driven insights.</p>
+                    </div>
+                </div>`
+        },
+        "fao": {
+            category: "ecosystems inclusion climate",
+            organization: "FAO",
+            title: "Fostering Sustainable Entrepreneurial Ecosystems",
+            content: `
+                <div class="space-y-8 text-gray-700">
+                    <div>
+                        <h3 class="font-semibold text-lg mb-2" style="color: var(--accent-warm);">🎯 The Programmatic Challenge</h3>
+                        <p>The GISBA program aimed to strengthen the community-based economy in the Bolivian Amazon as a strategy for <strong>climate change adaptation</strong>. The core challenge was empowering local and indigenous communities to transform non-timber forest resources into viable, sustainable enterprises.</p>
+                    </div>
+                    
+                    <div>
+                        <h3 class="font-semibold text-lg mb-4" style="color: var(--accent-warm);">💡 My Strategic Solution & Key Deliverables</h3>
+                        
+                        <!-- Point 1 -->
+                        <div class="mb-8">
+                            <h4 class="font-bold text-lg text-accent-warm mb-2">1. Business Plan Architecture & Implementation</h4>
+                            <p class="text-sm text-gray-600 leading-relaxed mb-4">I architected and supported the implementation of <strong>30+ community business plans</strong> across key sustainable value chains (Brazil Nuts, Asaí, Wild Cacao). This diversification strategy was crucial for economic resilience against climate shocks.</p>
+                            
+                            <div class="bg-gray-50 border rounded-lg p-6">
+                                <h5 class="text-center font-semibold text-gray-700 mb-2">Business Portfolio by Value Chain</h5>
+                                <div class="chart-container" style="height: 250px;">
+                                    <canvas id="faoSectorsChart"></canvas>
+                                </div>
+                                <p class="text-xs text-center text-gray-500 mt-2">Support focused on Non-Timber Forest Products (NTFPs) and Sustainable Agriculture.</p>
+                            </div>
+                        </div>
+
+                        <!-- Point 2 -->
+                        <div class="mb-8">
+                            <h4 class="font-bold text-lg text-accent-warm mb-2">2. Financial Inclusion Strategy</h4>
+                            <p class="text-sm text-gray-600 leading-relaxed mb-4">I designed and managed the program's <strong>"Seed Fund" ($205k)</strong>, a critical financial mechanism that provided initial capital to launch and strengthen these community enterprises. The fund served as a catalyst, mobilizing significant additional investment.</p>
+                            
+                            <div class="bg-gray-50 border rounded-lg p-6">
+                                <h5 class="text-center font-semibold text-gray-700 mb-2">Financial Leverage Effect</h5>
+                                <div class="chart-container" style="height: 250px;">
+                                    <canvas id="faoFinanceChart"></canvas>
+                                </div>
+                                <p class="text-xs text-center text-gray-500 mt-2">The Seed Fund unlocked 4x its value in total mobilized investment.</p>
+                            </div>
+                        </div>
+
+                        <!-- Point 3 -->
+                        <div>
+                            <h4 class="font-bold text-lg text-accent-warm mb-2">3. Knowledge Management</h4>
+                            <p class="text-sm text-gray-600 leading-relaxed mb-3">I co-authored the <strong>"Amazonía Emprendedora" methodology</strong>, a comprehensive guide for training facilitators in the creation of sustainable, community-based enterprises.</p>
+                            
+                            <div class="bg-white border rounded-md p-4 shadow-sm">
+                                <p class="text-sm font-semibold mb-2">Key Resources:</p>
+                                <ul class="space-y-2 text-sm">
+                                    <li>
+                                        <a href="https://drive.google.com/file/d/1z93y_DqJRq_xdtm3nZ1SicrfJUeqxrkO/view?usp=drive_link" target="_blank" class="flex items-center text-accent-warm hover:underline hover:text-gray-800 transition-colors">
+                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                                            Methodology: Amazonía Emprendedora
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="https://drive.google.com/file/d/1Z2x7OTqcBDKYKxuS5KRe7xzQ28v3GH15/view?usp=drive_link" target="_blank" class="flex items-center text-accent-warm hover:underline hover:text-gray-800 transition-colors">
+                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                            Final Financial Report (GISBA)
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 pt-4 border-t">
+                        <h3 class="font-semibold text-lg mb-2" style="color: var(--accent-warm);">🚀 The Measurable Impact</h3>
+                        <p>My work directly contributed to <strong>strengthening the economic resilience of hundreds of families</strong> in the Amazon region. Managed a total investment of <strong>$1.02M USD</strong>, ensuring financial sustainability for community enterprises.</p>
+                    </div>
+                </div>
+            `
+        },
+        "empoderar": {
+            category: "ecosystems inclusion",
+            organization: "EMPODERAR (World Bank)",
+            title: "Financial Viability Assessment of Agricultural Projects",
+            content: `
+                <div class="space-y-6 text-gray-700">
+                    <div>
+                        <h3 class="font-semibold text-lg mb-2" style="color: var(--accent-warm);">🎯 The Challenge</h3>
+                        <p>The EMPODERAR PAR III program, financed by the <strong>World Bank</strong>, required an independent, rigorous technical opinion to ensure that its investments in agricultural sub-projects were financially viable before disbursing funds.</p>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-lg mb-2" style="color: var(--accent-warm);">💡 My Strategic Solution & Key Deliverables</h3>
+                        <p class="mb-4">As an external Financial Evaluation Consultant, I provided an impartial, evidence-based assessment for 20 sub-projects.</p>
+                        <div class="border-l-4 pl-4 space-y-4" style="border-color: var(--accent-warm);">
+                            <div>
+                                <h4 class="font-semibold">1. Comprehensive Financial Modeling</h4>
+                                <p class="text-sm text-gray-600">Developed detailed financial models, applying a comparative analysis of scenarios "with and without the project".</p>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold">2. Portfolio of Evaluated Sub-Projects</h4>
+                                <p class="text-sm text-gray-600">Evaluated 20 plans (Potato, Amaranth, Beekeeping, Avocado, Dairy) totaling <strong>$1.8M USD</strong>.</p>
+                            </div>
+                        </div>
+                        <div class="mt-6 p-4 rounded-lg bg-gray-50 border">
+                            <h4 class="font-semibold text-center text-gray-700 mb-2">Evaluated Portfolio Overview</h4>
+                            <p class="text-xs text-center text-gray-500 mb-4">(Investment vs. Profitability vs. Families Impacted)</p>
+                            <div class="w-full mx-auto" style="height: 250px;">
+                                <canvas id="empoderarBubbleChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-lg mb-2" style="color: var(--accent-warm);">🚀 The Measurable Impact</h3>
+                        <p>My financial certification directly enabled the responsible allocation of <strong>$1.8 Million USD</strong> in project investments, benefiting <strong>483 producer families</strong>.</p>
+                    </div>
+                </div>
+            `
+        },
+        "olade": {
+            category: "data",
+            organization: "OLADE",
+            title: "Final Project Evaluation using OECD/DAC Criteria",
+            content: `
+                <div class="space-y-8 text-gray-700">
+                    <div>
+                        <h3 class="font-semibold text-lg mb-2" style="color: var(--accent-warm);">🎯 The Challenge</h3>
+                        <p>The Latin American Energy Organization (OLADE) required an independent final evaluation of its rural electrification project in Bolivia (Comunidades Itayovai, El Espino, El Carmen) to rigorously assess performance and sustainability.</p>
+                    </div>
+                    
+                    <div>
+                        <h3 class="font-semibold text-lg mb-4" style="color: var(--accent-warm);">💡 My Strategic Solution & Key Deliverables</h3>
+                        <p class="mb-4 text-sm text-gray-600 leading-relaxed">I designed and executed a comprehensive evaluation plan based on the five <strong>OECD/DAC criteria</strong>, combining quantitative data analysis of solar system performance with qualitative community feedback.</p>
+                        
+                        <!-- Visualization of OECD Ratings -->
+                        <div class="bg-gray-50 border rounded-lg p-6 mb-6">
+                            <h4 class="font-semibold text-center text-gray-700 mb-4">Project Evaluation Ratings (OECD/DAC)</h4>
+                            <div class="w-full max-w-md mx-auto" style="height: 300px;">
+                                <canvas id="oecdRadarChart"></canvas>
+                            </div>
+                            <p class="text-xs text-center text-gray-500 mt-2">Scores derived from the final evaluation matrix (Scale 1-5).</p>
+                        </div>
+
+                        <!-- Link to Report -->
+                        <div class="bg-white border rounded-md p-4 shadow-sm">
+                            <p class="text-sm font-semibold mb-2">Key Deliverable:</p>
+                            <a href="https://drive.google.com/file/d/1Jw7c1Vfx-uaVOOjWmlrfa7HFu6bgZBtx/view?usp=drive_link" target="_blank" class="flex items-center text-sm text-accent-warm hover:underline hover:text-gray-800 transition-colors">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                Final Evaluation Report (PDF)
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-4 border-t">
+                        <h3 class="font-semibold text-lg mb-2" style="color: var(--accent-warm);">🚀 The Measurable Impact</h3>
+                        <p>My evaluation provided OLADE's leadership with a definitive analysis of the project's successes, highlighting a high relevance (Score: 5/5) for energy access in isolated areas, while identifying critical challenges in financial sustainability that informed future regional energy project designs.</p>
+                    </div>
+                </div>
+            `
+        },
+        "socodevi": {
+            category: "data",
+            organization: "SOCODEVI",
+            title: "Data Systematization for Nutritional Impact Analysis",
+            content: `
+                <div class="space-y-6 text-gray-700">
+                    <div>
+                        <h3 class="font-semibold text-lg mb-2" style="color: var(--accent-warm);">🎯 The Challenge</h3>
+                        <p>SOCODEVI had collected vast primary field data but lacked the capacity to process it to answer: "To what extent are we improving nutritional status?"</p>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-lg mb-2" style="color: var(--accent-warm);">💡 My Strategic Solution</h3>
+                        <p class="mb-4">I designed a complete data systematization workflow and built analytical models to calculate complex indicators like the "Minimum Acceptable Diet" (MAD).</p>
+                        <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div class="text-center p-4 rounded-lg bg-gray-50 border">
+                                <h4 class="font-semibold text-gray-700 text-sm">Min. Acceptable Diet</h4>
+                                <canvas id="madChart" class="mx-auto" style="max-width: 120px; max-height: 120px;"></canvas>
+                            </div>
+                            <div class="text-center p-4 rounded-lg bg-gray-50 border">
+                                <h4 class="font-semibold text-gray-700 text-sm">Dietary Diversity</h4>
+                                <canvas id="diversityChart" class="mx-auto" style="max-width: 120px; max-height: 120px;"></canvas>
+                            </div>
+                            <div class="text-center p-4 rounded-lg bg-gray-50 border">
+                                <h4 class="font-semibold text-gray-700 text-sm">Meal Frequency</h4>
+                                <canvas id="frequencyChart" class="mx-auto" style="max-width: 120px; max-height: 120px;"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-lg mb-2" style="color: var(--accent-warm);">🚀 The Measurable Impact</h3>
+                        <p>Provided the first clear evidence that only <strong>46% of children met the "Minimum Acceptable Diet"</strong> standard, creating a crucial baseline for future interventions.</p>
+                    </div>
+                </div>
+            `
+        },
+        "molino": {
+            category: "ecosystems",
+            organization: "MOLINO ANDINO S.A.",
+            title: "Business Plan for a $7.3M Expansion",
+            content: `
+                <div class="space-y-6 text-gray-700">
+                    <div>
+                        <h3 class="font-semibold text-lg mb-2" style="color: var(--accent-warm);">🎯 The Challenge</h3>
+                        <p>Developing a bankable business plan to justify a $7.3M industrial expansion, requiring deep market data analysis and financial forecasting.</p>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-lg mb-2" style="color: var(--accent-warm);">💡 Strategic Analysis</h3>
+                        <p class="mb-4">I architected the complete business plan, projecting cash flows and calculating key investment indicators (ROI, NPV, IRR).</p>
+                        <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="text-center p-4 rounded-lg bg-gray-50 border">
+                                <h4 class="font-semibold text-gray-700">Projected ROI</h4>
+                                <div class="chart-container" style="height:150px">
+                                    <canvas id="roiChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="text-center p-4 rounded-lg bg-gray-50 border">
+                                <h4 class="font-semibold text-gray-700">Market Share Growth</h4>
+                                <div class="chart-container" style="height:150px">
+                                    <canvas id="marketShareChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-lg mb-2" style="color: var(--accent-warm);">🚀 The Measurable Impact</h3>
+                        <p>The plan provided the evidence-based foundation to approve a <strong>$7.3 Million USD investment</strong>, projecting a <strong>25% ROI</strong>.</p>
+                    </div>
+                </div>
+            `
+        }
+    };
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const projectGallery = document.getElementById('project-gallery');
+        const modalContainer = document.getElementById('modal-container');
+        
+        for (const key in projectsData) {
+            const project = projectsData[key];
+            const card = document.createElement('div');
+            card.className = 'project-card rounded-lg overflow-hidden shadow-md cursor-pointer';
+            card.setAttribute('data-category', project.category);
+            card.setAttribute('data-modal-id', key);
+            card.innerHTML = `
+                <div class="p-6">
+                    <p class="text-sm" style="color: var(--accent-warm);">${project.organization}</p>
+                    <h3 class="text-xl font-semibold mt-1" style="color: var(--text-dark);">${project.title}</h3>
+                </div>`;
+            projectGallery.appendChild(card);
+            
+            const modal = document.createElement('div');
+            modal.id = `${key}-modal`;
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center p-4 z-50';
+            modal.innerHTML = `
+                <div class="modal-content rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto p-8 relative">
+                    <button class="close-modal absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-3xl font-bold">&times;</button>
+                    <h2 class="text-2xl font-bold mb-6" style="color: var(--text-dark);">${project.organization}: ${project.title}</h2>
+                    ${project.content}
+                </div>`;
+            modalContainer.appendChild(modal);
+        }
+
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const projectCards = document.querySelectorAll('.project-card');
+
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const filter = btn.getAttribute('data-filter');
+                projectCards.forEach(card => {
+                    card.style.display = (filter === 'all' || card.getAttribute('data-category').includes(filter)) ? 'block' : 'none';
+                });
+            });
+        });
+
+        projectCards.forEach(card => {
+            card.addEventListener('click', () => {
+                const modalId = card.getAttribute('data-modal-id');
+                const modal = document.getElementById(`${modalId}-modal`);
+                if(modal) {
+                    modal.style.display = 'flex';
+                    // Initialize specific charts
+                    if (modalId === 'unodc') initializeUnodcCharts();
+                    if (modalId === 'conexion') initializeConexionCharts();
+                    if (modalId === 'empoderar') initializeEmpoderarChart();
+                    if (modalId === 'molino') initializeMolinoCharts();
+                    if (modalId === 'socodevi') initializeSocodeviCharts();
+                    if (modalId === 'olade') initializeOladeChart();
+                    if (modalId === 'fao') initializeFaoCharts();
+                }
+            });
+        });
+
+        const closeModal = (modal) => {
+            if (modal) {
+                modal.style.display = 'none';
+                currentCharts.forEach(chart => chart.destroy());
+                currentCharts = [];
+            }
+        };
+
+        modalContainer.addEventListener('click', function(e) {
+            if (e.target.closest('.close-modal')) {
+                closeModal(e.target.closest('[id$="-modal"]'));
+            } else if (e.target.matches('[id$="-modal"]')) {
+                closeModal(e.target);
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === "Escape") {
+                document.querySelectorAll('[id$="-modal"]').forEach(closeModal);
+            }
+        });
+
+        // --- CHART INITIALIZERS ---
+
+        function initializeUnodcCharts() {
+            currentCharts.forEach(chart => chart.destroy());
+            currentCharts = [];
+
+            // 1. Delivery Chart (Bar) - Updated Data Point 3
+            const deliveryCtx = document.getElementById('unodcDeliveryChart').getContext('2d');
+            const deliveryChart = new Chart(deliveryCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Target ($4.5M)', 'Executed ($3.7M)'],
+                    datasets: [{
+                        label: 'Amount (USD Millions)',
+                        data: [4.5, 3.7],
+                        backgroundColor: ['#E5E7EB', '#C57B57'],
+                        borderRadius: 4,
+                        barPercentage: 0.6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { 
+                        y: { 
+                            beginAtZero: true, 
+                            title: { display: true, text: 'USD Millions' },
+                            grid: { color: '#f3f4f6' }
+                        },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+
+            // 2. Compliance Chart (Horizontal Bar) - New Data Point 5
+            const complianceCtx = document.getElementById('unodcComplianceChart').getContext('2d');
+            const complianceChart = new Chart(complianceCtx, {
+                type: 'bar',
+                indexAxis: 'y',
+                data: {
+                    labels: ['Reporting Compliance', 'Financial Delivery', 'Proposal Generation', 'Global Workplan'],
+                    datasets: [{
+                        label: '% Achieved',
+                        data: [90, 82, 80, 73], // Data extracted from report
+                        backgroundColor: ['#4b5563', '#4b5563', '#4b5563', '#C57B57'], // Highlight Global
+                        borderRadius: 4,
+                        barPercentage: 0.7
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { 
+                        x: { 
+                            beginAtZero: true, 
+                            max: 100,
+                            title: { display: true, text: '% Achievement' },
+                            grid: { color: '#f3f4f6' }
+                        },
+                        y: { grid: { display: false } }
+                    }
+                }
+            });
+            
+            currentCharts.push(deliveryChart, complianceChart);
+        }
+
+        function initializeConexionCharts() {
+            currentCharts.forEach(chart => chart.destroy());
+            currentCharts = [];
+            
+            // Business Plan Projection Chart (Line/Area)
+            const ctx = document.getElementById('conexionBusinessPlanChart').getContext('2d');
+            const bpChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['2021 (Start)', '2022', '2023', '2024 (Projected)'],
+                    datasets: [
+                        {
+                            label: 'Grant Dependency',
+                            data: [90, 80, 65, 50],
+                            borderColor: '#6B7280',
+                            backgroundColor: 'rgba(107, 114, 128, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Sustainability/Services',
+                            data: [10, 20, 35, 50],
+                            borderColor: '#C57B57',
+                            backgroundColor: 'rgba(197, 123, 87, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: { display: true, text: 'Transition to Financial Sustainability Model' }
+                    },
+                    scales: { y: { beginAtZero: true, max: 100, title: {display: true, text: '% of Income'} } }
+                }
+            });
+            currentCharts.push(bpChart);
+        }
+
+        function initializeFaoCharts() {
+            currentCharts.forEach(chart => chart.destroy());
+            currentCharts = [];
+
+            // 1. Sectors Chart (Bar)
+            const sectorsCtx = document.getElementById('faoSectorsChart').getContext('2d');
+            const sectorsChart = new Chart(sectorsCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Castaña (Brazil Nuts)', 'Wild Cacao', 'Asaí / Native Fruits', 'Fishing/Aquaculture', 'Other (Honey/Bakery)'],
+                    datasets: [{
+                        label: 'Business Plans Supported',
+                        data: [8, 6, 6, 5, 5], // Representative distribution based on the portfolio of 30+ plans
+                        backgroundColor: '#C57B57',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { 
+                        y: { beginAtZero: true, title: { display: true, text: '# of Business Plans' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+
+            // 2. Financial Leverage Chart (Doughnut)
+            const financeCtx = document.getElementById('faoFinanceChart').getContext('2d');
+            const financeChart = new Chart(financeCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Seed Fund (Direct)', 'Leveraged/Co-financing'],
+                    datasets: [{
+                        data: [205080, 813946], // Data from Final Report
+                        backgroundColor: ['#C57B57', '#4b5563'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '60%',
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        title: { display: true, text: 'Total Mobilized: $1.02M USD', position: 'top' }
+                    }
+                }
+            });
+
+            currentCharts.push(sectorsChart, financeChart);
+        }
+
+        function initializeEmpoderarChart() {
+            currentCharts.forEach(chart => chart.destroy());
+            currentCharts = [];
+            const ctx = document.getElementById('empoderarBubbleChart').getContext('2d');
+            const chart = new Chart(ctx, {
+                type: 'bubble',
+                data: {
+                    datasets: [
+                        { label: 'Potato', data: [{ x: 121, y: 18, r: 15 }], backgroundColor: 'rgba(197, 123, 87, 0.7)'},
+                        { label: 'Amaranth', data: [{ x: 80, y: 22, r: 10 }], backgroundColor: 'rgba(63, 63, 63, 0.7)' },
+                        { label: 'Avocado', data: [{ x: 150, y: 20, r: 20 }], backgroundColor: 'rgba(197, 123, 87, 0.5)'},
+                        { label: 'Dairy', data: [{ x: 100, y: 17, r: 12 }], backgroundColor: 'rgba(63, 63, 63, 0.5)'}
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { title: { display: true, text: 'Investment (k USD)' } },
+                        y: { title: { display: true, text: 'Profitability (IRR %)' } }
+                    }
+                }
+            });
+            currentCharts.push(chart);
+        }
+
+        function initializeMolinoCharts() {
+            currentCharts.forEach(chart => chart.destroy());
+            currentCharts = [];
+            
+            const roiCtx = document.getElementById('roiChart').getContext('2d');
+            const roiChart = new Chart(roiCtx, {
+                type: 'doughnut',
+                data: { labels: ['ROI', ''], datasets: [{ data: [25, 75], backgroundColor: ['#C57B57', '#F1F1F1'] }] },
+                options: { cutout: '70%', plugins: { legend: { display: false }, title: { display: true, text: '25%', position: 'bottom' } } }
+            });
+
+            const shareCtx = document.getElementById('marketShareChart').getContext('2d');
+            const shareChart = new Chart(shareCtx, {
+                type: 'doughnut',
+                data: { labels: ['Growth', ''], datasets: [{ data: [15, 85], backgroundColor: ['#3F3F3F', '#F1F1F1'] }] },
+                options: { cutout: '70%', plugins: { legend: { display: false }, title: { display: true, text: '+15%', position: 'bottom' } } }
+            });
+            currentCharts.push(roiChart, shareChart);
+        }
+
+        function createDoughnutChart(ctx, data, text) {
+            return new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Achieved', ''],
+                    datasets: [{
+                        data: data,
+                        backgroundColor: ['#C57B57', '#F1F1F1'],
+                        borderColor: ['#C57B57', '#F1F1F1'],
+                        borderWidth: 1,
+                        circumference: 270,
+                        rotation: 225,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { enabled: false },
+                        title: { display: true, text: text, font: { size: 20, weight: 'bold' }, color: '#3F3F3F', position: 'bottom' }
+                    }
+                }
+            });
+        }
+
+        function initializeSocodeviCharts() {
+            currentCharts.forEach(chart => chart.destroy());
+            currentCharts = [];
+            const madChart = createDoughnutChart(document.getElementById('madChart').getContext('2d'), [46, 54], '46%');
+            const diversityChart = createDoughnutChart(document.getElementById('diversityChart').getContext('2d'), [68, 32], '68%');
+            const frequencyChart = createDoughnutChart(document.getElementById('frequencyChart').getContext('2d'), [89, 11], '89%');
+            currentCharts.push(madChart, diversityChart, frequencyChart);
+        }
+
+        function initializeOladeChart() {
+            currentCharts.forEach(chart => chart.destroy());
+            currentCharts = [];
+            const oecdCtx = document.getElementById('oecdRadarChart').getContext('2d');
+            const oecdRadarChart = new Chart(oecdCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['Relevance', 'Effectiveness', 'Efficiency', 'Impact', 'Sustainability'],
+                    datasets: [{
+                        label: 'Project Score (out of 5)',
+                        data: [5, 3, 3, 4, 3], 
+                        backgroundColor: 'rgba(197, 123, 87, 0.2)',
+                        borderColor: 'rgba(197, 123, 87, 1)',
+                        pointBackgroundColor: 'rgba(197, 123, 87, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(197, 123, 87, 1)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(63, 63, 63, 0.2)' },
+                            grid: { color: 'rgba(63, 63, 63, 0.2)' },
+                            pointLabels: { font: { size: 12 }, color: '#3F3F3F' },
+                            ticks: {
+                                backdropColor: 'transparent',
+                                color: '#6B7280',
+                                stepSize: 1,
+                                max: 5,
+                                min: 0
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: { color: '#3F3F3F' }
+                        }
+                    }
+                }
+            });
+            currentCharts.push(oecdRadarChart);
+        }
+    });
+    </script>
+</body>
+</html>
